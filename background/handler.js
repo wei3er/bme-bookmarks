@@ -1,19 +1,11 @@
 var extensionState = {
-    defaultReloadRate: 30,
-
+    storage: {},
     error: false,
     message: null,
-    
-    local: {
-        ts: null,
-        md5: null,
-    },
-
     remote: {
         ts: null,
         md5: null
     }
-
 }
 
 function handleError(error) {
@@ -23,17 +15,30 @@ function handleError(error) {
     browser.browserAction.setIcon({ path: "/icons/logo-error.png" });
 }
 
+function parseBookmarks(raw) {
+    switch(extensionState.storage.format) {
+        case "Firefox":
+            //TODO
+            return JSON.parse(raw);
+        case "Chrome":
+            //TODO
+            return JSON.parse(raw);
+        default:
+            throw `unsupported format type: ${extensionState.storage.format}!`;
+    }
+}
+
 function reloadBookmarks() {
     return getStorage().get()
         .then(storageData => {
             return httpRequest({ method: "GET", url: storageData.bookmarksUri })
                 .then(loadedData => {
-                    return {md5: md5(loadedData), parsed: JSON.parse(loadedData) };
+                    return {md5: md5(loadedData), parsed: parseBookmarks(loadedData), raw: loadedData };
                 })
                 .then(obj => {
                     extensionState.remote.md5 = obj.md5;
                     extensionState.remote.ts = new Date();
-                    if(extensionState.local.md5 != extensionState.remote.md5) {
+                    if(extensionState.storage.md5 != extensionState.remote.md5) {
                         browser.browserAction.setIcon({ path: "/icons/logo-dirty.png" });
                     }
                     return obj;
@@ -107,15 +112,11 @@ function mergeBookmarks() {
                 })
                 .then(() => {
                     var now = new Date();
-                    extensionState.local.ts = now;
-                    return getStorage().set({ update: now, md5: obj.md5 });
+                    return getStorage().set({ ts: now, md5: obj.md5, raw: obj.raw });
                 })
-        
-
         })
         .catch(handleError);
 }
-
 
 // handle messages from other components
 browser.runtime.onMessage.addListener((req, sender, sendResponse) => {
@@ -126,6 +127,7 @@ browser.runtime.onMessage.addListener((req, sender, sendResponse) => {
             break;
         case Events.ERROR:
             handleError(extensionState.message);
+            sendResponse(newEvent(Events.ACK));
             break;
         case Events.STATE:
             sendResponse(newEvent(Events.STATE, extensionState));
@@ -135,19 +137,32 @@ browser.runtime.onMessage.addListener((req, sender, sendResponse) => {
     }
 });
 
-// refresh bookmark source periodically
-const syncAlarm = "sync-alarm"
-browser.alarms.onAlarm.addListener(alarmInfo => {
-    if(syncAlarm == alarmInfo.name) {
-        reloadBookmarks().catch(handleError);
-    }
-});
 getStorage().get().then(storageData => {
-    extensionState.local.md5 = storageData.md5;
-    extensionState.local.ts = storageData.update;
-    var reloadRate = storageData.reloadRate || extensionState.defaultReloadRate;
-    browser.alarms.create(syncAlarm, { periodInMinutes: reloadRate });
-}).catch(handleError);
-
-reloadBookmarks().catch(handleError);
+        // load snapshot of storage
+        extensionState.storage = storageData;
+    })
+    .then(() => {
+        // refresh bookmarks source periodically
+        const syncAlarm = "sync-alarm";
+        browser.alarms.onAlarm.addListener(alarmInfo => {
+            if(syncAlarm == alarmInfo.name) {
+                reloadBookmarks().catch(handleError);
+            }
+        })
+        return browser.alarms.create(syncAlarm, { periodInMinutes: extensionState.storage.reloadRate || 30 });
+    })
+    .then(() => {
+        // keep track of storage changes
+        return browser.storage.onChanged.addListener((changes, area) => {
+            for (let item of Object.keys(changes)) {
+                extensionState.storage[item] = changes[item].newValue;
+            }
+        });
+    })
+    .then(() => {
+        // perform initial reload
+        return reloadBookmarks();
+    })
+    .catch(handleError);
+  
 

@@ -2,6 +2,7 @@ const Events = {
     MERGE: "merge",
     ERROR: "error",
     STATE: "state",
+    ACK: "ack",
 };
 
 function newEvent(type, value) {
