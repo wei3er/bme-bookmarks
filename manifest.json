@@ -37,7 +37,8 @@
   "background": {
     "scripts": [
       "/common.js",
-      "/background/sync.js"
+      "/md5.js",
+      "/background/handler.js"
     ]
   }
 

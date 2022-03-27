@@ -1,3 +1,13 @@
+const Events = {
+    MERGE: "merge",
+    ERROR: "error",
+    STATE: "state",
+};
+
+function newEvent(type, value) {
+    return { type: type, ts: new Date(), value: value };
+}
+
 function getStorage() {
     return browser.storage.local;
 }

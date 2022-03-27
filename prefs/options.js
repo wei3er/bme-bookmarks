@@ -1,13 +1,12 @@
 function handleError(error) {
-    console.log(error);
-    browser.runtime.sendMessage({ type: "error", ts: new Date(), value: error }).catch(e => console.log(e));
+    console.error(error)
 }
 
 function saveOptions(e) {
     e.preventDefault();
     getStorage().set({
         bookmarksUri: document.querySelector("#uri").value,
-        reloadRate: document.querySelector("#reload").value,
+        reloadRate: parseInt(document.querySelector("#reload").value),
         bookmarksFormat: document.querySelector('input[name="format"]:checked').value
     }).catch(handleError);
 }
@@ -34,15 +33,3 @@ function restoreOptions() {
 
 document.addEventListener("DOMContentLoaded", restoreOptions);
 document.querySelector("form").addEventListener("submit", saveOptions);
-browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    switch(msg.type) {
-        case "merge":
-            getStorage().set({
-                updated: msg.value
-            }).catch(handleError);
-            break;
-        default:
-            // nothing to do
-    }
-    sendResponse({ ack: true, comp: "options" });
-})
