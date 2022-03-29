@@ -1,3 +1,5 @@
+
+
 const Events = {
     MERGE: "merge",
     FETCH: "fetch",
@@ -10,8 +12,15 @@ function newEvent(type, value) {
     return { type: type, ts: new Date(), value: value };
 }
 
+function getBrowser() {
+    if (typeof browser === "undefined") {
+        return chrome;
+    }
+    return browser;
+}
+
 function getStorage() {
-    return browser.storage.local;
+    return getBrowser().storage.local;
 }
 
 function httpRequest(obj) {

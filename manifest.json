@@ -34,7 +34,7 @@
     "scripts": [
       "/common.js",
       "/md5.js",
-      "/md5.js",
+      "/browser-polyfill.js",
       "/background/firefox.js",
       "/background/chrome.js",
       "/background/handler.js"

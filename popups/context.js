@@ -11,13 +11,13 @@ function formatDate(d) {
 
 function updateUI(resp) {
     document.querySelector("#localDate").innerHTML = formatDate(resp.value.storage.ts);
+    document.querySelector("#remoteDate").innerHTML = formatDate(resp.value.remote.ts);
     document.querySelector("#localMd5").innerHTML = formatDate(resp.value.storage.md5);
 
     var dirty = resp.value.remote.md5 != resp.value.storage.md5
     document.querySelector("#remote").style.visibility = "hidden";
     if(dirty) {
         document.querySelector("#remote").style.visibility = "visible";
-        document.querySelector("#remoteDate").innerHTML = formatDate(resp.value.remote.ts);
         document.querySelector("#remoteMd5").innerHTML = formatDate(resp.value.remote.md5);
     }
 
@@ -25,7 +25,7 @@ function updateUI(resp) {
         document.querySelector("#msg").innerHTML = (!resp.value.error ? "" : "error: ") + resp.value.message;
     }
 
-    return httpRequest({ method: "GET", url: browser.runtime.getURL("manifest.json") })
+    return httpRequest({ method: "GET", url: getBrowser().runtime.getURL("manifest.json") })
         .then(loadedData => {
             var manifest = JSON.parse(loadedData);
             document.querySelector("#release").innerHTML = manifest.version_name;
@@ -34,7 +34,7 @@ function updateUI(resp) {
 }
 
 document.addEventListener("DOMContentLoaded", function() {
-        browser.runtime.sendMessage(newEvent(Events.STATE))
+        getBrowser().runtime.sendMessage(newEvent(Events.STATE))
             .then(resp => updateUI(resp))
             .catch(handleError);
     }
@@ -42,12 +42,12 @@ document.addEventListener("DOMContentLoaded", function() {
 
 document.addEventListener('click', (event)=> { 
     if(event.target.id == "merge") {
-        browser.runtime.sendMessage(newEvent(Events.MERGE))
+        getBrowser().runtime.sendMessage(newEvent(Events.MERGE))
             .then(resp => updateUI(resp))
             .catch(handleError);
     }
     if(event.target.id == "fetch") {
-        browser.runtime.sendMessage(newEvent(Events.FETCH))
+        getBrowser().runtime.sendMessage(newEvent(Events.FETCH))
             .then(resp => updateUI(resp))
             .catch(handleError);
     }

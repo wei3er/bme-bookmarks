@@ -23,12 +23,12 @@
         <div id="form">
             <form>
                 <div id="local">
+                    <div><b>last merge:</b> <span id="localDate"></span></div>
+                    <div><b>last fetch:</b> <span id="remoteDate"></span></div>
                     <div><b>local md5:</b> <span id="localMd5"></span></div>
-                    <div><b>last update:</b> <span id="localDate"></span></div>
                 </div>
                 <div id="remote">
                     <div><b>remote md5:</b> <span id="remoteMd5"></span></div>
-                    <div><b>last check:</b> <span id="remoteDate"></span></div>
                 </div>
                 <div id="msg"></div>
                 <div id="actions">
@@ -42,6 +42,7 @@
     </div>
 
     <script src="/common.js"></script>
+    <script src="/browser-polyfill.js"></script>
     <script src="/popups/context.js"></script>
 </body>
 

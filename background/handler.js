@@ -8,10 +8,15 @@ var extensionState = {
     }
 }
 
+function reset() {
+    extensionState.error = false;
+    extensionState.message = null;
+}
+
 function handleError(error) {
     extensionState.error = true;
-    extensionState.message = error;
-    console.error(error == "" ? "unspecified error": error)
+    extensionState.message = error == "" ? "unspecified error" : error;
+    console.error(extensionState.message)
     updateIcon();
 }
 
@@ -47,7 +52,7 @@ function clearBookmarks() {
       var tmp = [];
   
       for (const item of items) {
-        tmp.push(browser.bookmarks.removeTree(item.id)
+        tmp.push(getBrowser().bookmarks.removeTree(item.id)
           .catch(function () {
             if (item.children.length) {
               tmp.push(rmItem(item.children))
@@ -57,7 +62,7 @@ function clearBookmarks() {
       }
       return Promise.all(tmp)
     }
-    return browser.bookmarks.getTree()
+    return getBrowser().bookmarks.getTree()
                 .then(roots => {
                     return rmItem(roots)
                 });
@@ -73,10 +78,9 @@ async function createBookmarks(items) {
             thisKey += "###" + comp;
             thisNode = parentIds[thisKey]
             if (!thisNode) {
-            await browser.bookmarks.create({
+            await getBrowser().bookmarks.create({
                 parentId: parent == null ? null : parent.id,
-                title: comp,
-                type: "folder"
+                title: comp
             }).then(function (i) {
                 parentIds[thisKey] = i;
             });
@@ -85,12 +89,11 @@ async function createBookmarks(items) {
             parent = thisNode;
         }
 
-        await browser.bookmarks.create({
+        await getBrowser().bookmarks.create({
             parentId: parent == null ? null : parent.id,
             title: item.title,
             url: item.url,
-            index: item.index,
-            type: "bookmark"
+            index: item.index
         });
     }
 }
@@ -115,22 +118,23 @@ function mergeBookmarks() {
 }
 
 function updateIcon() {
-    browser.browserAction.setIcon({ path: "/icons/logo-96.png" });
+    getBrowser().browserAction.setIcon({ path: "/icons/logo-96.png" });
     if(extensionState.error) {
-        browser.browserAction.setBadgeText({ text: "E" });
+        getBrowser().browserAction.setBadgeText({ text: "E" });
 
     } else if(extensionState.storage.md5 != extensionState.remote.md5) {
-        browser.browserAction.setBadgeText({ text: "U" });
+        getBrowser().browserAction.setBadgeText({ text: "U" });
 
     } else {
-        browser.browserAction.setBadgeText({ text: "" });
+        getBrowser().browserAction.setBadgeText({ text: "" });
     }
 }
 
 // handle messages from other components
-browser.runtime.onMessage.addListener((req, sender, sendResponse) => {
+getBrowser().runtime.onMessage.addListener((req, sender, sendResponse) => {
     switch(req.type) {
         case Events.MERGE:
+            reset();
             mergeBookmarks()
                 .then(() => {
                     updateIcon();
@@ -169,21 +173,21 @@ getStorage().get().then(storageData => {
     })
     .then(() => {
         // refresh bookmarks source periodically
-        browser.alarms.onAlarm.addListener(alarmInfo => {
+        getBrowser().alarms.onAlarm.addListener(alarmInfo => {
             if(syncAlarm == alarmInfo.name) {
                 reloadBookmarks().catch(handleError);
             }
         })
-        return browser.alarms.create(syncAlarm, { periodInMinutes: extensionState.storage.reloadRate || 30 });
+        return getBrowser().alarms.create(syncAlarm, { periodInMinutes: extensionState.storage.reloadRate || 30 });
     })
     .then(() => {
         // keep track of storage changes
-        return browser.storage.onChanged.addListener((changes, area) => {
+        return getBrowser().storage.onChanged.addListener((changes, area) => {
             for (let item of Object.keys(changes)) {
                 extensionState.storage[item] = changes[item].newValue;
                 if(item = "reloadRate") {
-                    browser.alarms.clear(syncAlarm);
-                    browser.alarms.create(syncAlarm, { periodInMinutes: extensionState.storage.reloadRate });
+                    getBrowser().alarms.clear(syncAlarm);
+                    getBrowser().alarms.create(syncAlarm, { periodInMinutes: extensionState.storage.reloadRate });
                 }
             }
         });
