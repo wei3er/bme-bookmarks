@@ -25,10 +25,12 @@ function updateUI(resp) {
         document.querySelector("#msg").innerHTML = (!resp.value.error ? "" : "error: ") + resp.value.message;
     }
 
-    browser.management.getSelf().then(info => {
-        document.querySelector("#release").innerHTML = `Release: ${info.version}`;
-        document.querySelector("#name").innerHTML = info.name;
-    });
+    return httpRequest({ method: "GET", url: browser.runtime.getURL("manifest.json") })
+        .then(loadedData => {
+            var manifest = JSON.parse(loadedData);
+            document.querySelector("#release").innerHTML = manifest.version_name;
+            document.querySelector("#name").innerHTML = manifest.name;
+        });
 }
 
 document.addEventListener("DOMContentLoaded", function() {
