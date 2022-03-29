@@ -4,31 +4,30 @@
 
 <head>
     <meta charset="utf-8">
+    <link rel="stylesheet" href="/prefs/style.css">
 </head>
 
 <body>
 
-    <form>
-        <p>
-            <label>
-                Bookmark URI:
-                <input type="text" id="uri">
-            </label>
-        </p>
-        <p>
-            <label>
-                Bookmark Format:
-                <input type="radio" id="firefox" name="format" value="Firefox" checked>
-                <label for="firefox">Firefox</label>
-                <input type="radio" id="chrome" name="format" value="Chrome">
-                <label for="chrome">Chrome</label>
-            </label>
-        </p>
-        <p>
-            Reload Rate (secs):
-            <input type="text" id="reload">
-        </p>
-        <button type="submit">Save</button>
+    <form id="form">
+        <div id="bookmarks">
+            <div><b>Bookmark Resources</b></div>
+            <div id="resources"></div>
+            <div class="actions">
+                <button id="add" type="button">Add</button>
+                <button id="remove" type="button">Remove</button>
+            </div>
+        </div>
+        <div>
+            <div><b>Other Settings</b></div>
+            <div>
+                <label for="reload">Reload Rate (secs)</label>
+                <input type="text" id="reload">
+            </div>
+        </div>
+        <div class="actions">
+            <button id="save" type="submit">Save</button>
+        </div>
     </form>
 
     <script src="/common.js"></script>

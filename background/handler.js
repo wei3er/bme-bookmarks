@@ -1,11 +1,9 @@
 var extensionState = {
     storage: {},
+    snapshots: {},
+    modified: null,
     error: false,
     message: null,
-    remote: {
-        ts: null,
-        md5: null
-    }
 }
 
 function reset() {
@@ -16,56 +14,113 @@ function reset() {
 function handleError(error) {
     extensionState.error = true;
     extensionState.message = error == "" ? "unspecified error" : error;
-    console.error(extensionState.message)
+    //console.error(extensionState.message);
     updateIcon();
 }
 
-function parseBookmarks(raw) {
-    switch(extensionState.storage.bookmarksFormat) {
-        case "Firefox":
-            return parseFirefox(raw);
-        case "Chrome":
+function parseBookmarks(bookmark, raw) {
+    switch (bookmark.format) {
+        case Formats.FIREFOX:
+            return parseFirefox(bookmark.folder, raw);
+        case Formats.CHROME:
             //TODO
-            return parseChrome(raw);
+            return parseChrome(bookmark.folder, raw);
         default:
-            throw `unsupported format type: ${extensionState.storage.bookmarksFormat}!`;
+            throw `unsupported format type: ${bookmark.format}!`;
     }
 }
 
+
+function translateResponse(bookmark, payload) {
+    if (bookmark.content) {
+        switch (bookmark.content) {
+            case ContentTypes.PLAIN:
+                return payload;
+            case ContentTypes.GITHUB:
+                return atob(JSON.parse(payload).content);
+            default:
+                throw `unsupported content type: ${bookmark.content}`;
+        }
+    }
+    return payload;
+}
+
+
+function translateAuthHeader(bookmark) {
+    if (bookmark.auth && bookmark.auth.type) {
+        switch (bookmark.auth.type) {
+            case AuthTypes.NONE:
+                return null;
+            case AuthTypes.BASIC:
+                return { Authorization: `Basic ${btoa(bookmark.auth.value)}` };
+            case AuthTypes.BEARER:
+                return { Authorization: `Bearer ${bookmark.auth.value}` };
+            case AuthTypes.GITHUB:
+                return { Authorization: `token ${bookmark.auth.value}` };
+            default:
+                throw `unsupported auth type: ${bookmark.auth.type}`;
+        }
+    }
+    return null;
+}
+
 function reloadBookmarks() {
-    return getStorage().get()
-        .then(storageData => {
-            return httpRequest({ method: "GET", url: storageData.bookmarksUri })
-                .then(loadedData => {
-                    return {md5: md5(loadedData), parsed: parseBookmarks(loadedData), raw: loadedData };
-                })
-                .then(obj => {
-                    extensionState.remote.md5 = obj.md5;
-                    extensionState.remote.ts = new Date();
-                    return obj;
-                });
+    var newSnapshots = {};
+    var allBookmarks = [];
+    let promises = [];
+    for (const bookmark of extensionState.storage.bookmarks) {
+        promises.push(httpRequest({
+            method: "GET",
+            url: bookmark.uri,
+            headers: translateAuthHeader(bookmark)
+        })
+            .then(payload => {
+                return translateResponse(bookmark, payload);
+            })
+            .then(loadedData => {
+                bookmarkSnapshot = extensionState.snapshots[bookmark.title];
+                if (!bookmarkSnapshot) {
+                    bookmarkSnapshot = {
+                        md5: null,
+                        ts: null,
+                        bookmarks: null,
+                    };
+                }
+                bookmarkSnapshot.md5 = md5(loadedData);
+                bookmarkSnapshot.bookmarks = parseBookmarks(bookmark, loadedData);
+
+                bookmarkSnapshot.ts = new Date();
+                newSnapshots[bookmark.title] = bookmarkSnapshot;
+                allBookmarks.push(...bookmarkSnapshot.bookmarks);
+                return bookmarkSnapshot.bookmarks;
+            }));
+    }
+    return Promise.all(promises)
+        .then((result) => {
+            extensionState.snapshots = newSnapshots;
+            return allBookmarks;
         });
 }
 
 function clearBookmarks() {
     function rmItem(items) {
-      var tmp = [];
-  
-      for (const item of items) {
-        tmp.push(getBrowser().bookmarks.removeTree(item.id)
-          .catch(function () {
-            if (item.children.length) {
-              tmp.push(rmItem(item.children))
-            }
-          })
-        );
-      }
-      return Promise.all(tmp)
+        var tmp = [];
+
+        for (const item of items) {
+            tmp.push(getBrowser().bookmarks.removeTree(item.id)
+                .catch(function () {
+                    if (item.children.length) {
+                        tmp.push(rmItem(item.children))
+                    }
+                })
+            );
+        }
+        return Promise.all(tmp)
     }
     return getBrowser().bookmarks.getTree()
-                .then(roots => {
-                    return rmItem(roots)
-                });
+        .then(roots => {
+            return rmItem(roots)
+        });
 }
 
 async function createBookmarks(items) {
@@ -78,13 +133,13 @@ async function createBookmarks(items) {
             thisKey += "###" + comp;
             thisNode = parentIds[thisKey]
             if (!thisNode) {
-            await getBrowser().bookmarks.create({
-                parentId: parent == null ? null : parent.id,
-                title: comp
-            }).then(function (i) {
-                parentIds[thisKey] = i;
-            });
-            thisNode = parentIds[thisKey];
+                await getBrowser().bookmarks.create({
+                    parentId: parent == null ? null : parent.id,
+                    title: comp
+                }).then(function (i) {
+                    parentIds[thisKey] = i;
+                });
+                thisNode = parentIds[thisKey];
             }
             parent = thisNode;
         }
@@ -103,36 +158,42 @@ function mergeBookmarks() {
     extensionState.error = false;
     extensionState.message = null
     return reloadBookmarks()
-        .then(obj => {
+        .then(items => {
             return clearBookmarks()
                 .then(() => {
-                    return createBookmarks(obj.parsed);
+                    return createBookmarks(items);
                 })
                 .then(() => {
                     var now = new Date();
-                    extensionState.storage.md5 = obj.md5;
-                    extensionState.storage.ts = now;
-                    return getStorage().set({ ts: now, md5: obj.md5, raw: obj.raw });
+                    for (var bookmark of extensionState.storage.bookmarks) {
+                        var update = extensionState.snapshots[bookmark.title];
+                        bookmark.md5 = update.md5;
+                        bookmark.ts = now;
+                    }
+                    return getStorage().set({ bookmarks: extensionState.storage.bookmarks });
                 });
         });
 }
 
 function updateIcon() {
     getBrowser().browserAction.setIcon({ path: "/icons/logo-96.png" });
-    if(extensionState.error) {
+    if (extensionState.error) {
         getBrowser().browserAction.setBadgeText({ text: "E" });
-
-    } else if(extensionState.storage.md5 != extensionState.remote.md5) {
-        getBrowser().browserAction.setBadgeText({ text: "U" });
-
-    } else {
-        getBrowser().browserAction.setBadgeText({ text: "" });
+        return;
     }
+    for (const bookmark of extensionState.storage.bookmarks) {
+        var update = extensionState.snapshots[bookmark.title];
+        if (bookmark.md5 != update.md5) {
+            getBrowser().browserAction.setBadgeText({ text: "U" });
+            return;
+        }
+    }
+    getBrowser().browserAction.setBadgeText({ text: "" });
 }
 
 // handle messages from other components
 getBrowser().runtime.onMessage.addListener((req, sender, sendResponse) => {
-    switch(req.type) {
+    switch (req.type) {
         case Events.MERGE:
             reset();
             mergeBookmarks()
@@ -168,13 +229,13 @@ getBrowser().runtime.onMessage.addListener((req, sender, sendResponse) => {
 
 const syncAlarm = "sync-alarm";
 getStorage().get().then(storageData => {
-        // load snapshot of storage
-        extensionState.storage = storageData;
-    })
+    // load snapshot of storage
+    extensionState.storage = storageData;
+})
     .then(() => {
         // refresh bookmarks source periodically
         getBrowser().alarms.onAlarm.addListener(alarmInfo => {
-            if(syncAlarm == alarmInfo.name) {
+            if (syncAlarm == alarmInfo.name) {
                 reloadBookmarks().catch(handleError);
             }
         })
@@ -185,7 +246,7 @@ getStorage().get().then(storageData => {
         return getBrowser().storage.onChanged.addListener((changes, area) => {
             for (let item of Object.keys(changes)) {
                 extensionState.storage[item] = changes[item].newValue;
-                if(item = "reloadRate") {
+                if (item = "reloadRate") {
                     getBrowser().alarms.clear(syncAlarm);
                     getBrowser().alarms.create(syncAlarm, { periodInMinutes: extensionState.storage.reloadRate });
                 }
@@ -200,5 +261,9 @@ getStorage().get().then(storageData => {
             });
     })
     .catch(handleError);
-  
+
+// listen for bookmark changes
+browser.bookmarks.onChanged.addListener(function (id, changeInfo) {
+    getStorage().set({ modified: new Date() }).catch(handleError);
+});
 

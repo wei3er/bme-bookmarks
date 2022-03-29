@@ -19,25 +19,18 @@
                 <span id="release"></span>
             </div>
         </div>
-        <hr/>
-        <div id="form">
-            <form>
-                <div id="local">
-                    <div><b>last merge:</b> <span id="localDate"></span></div>
-                    <div><b>last fetch:</b> <span id="remoteDate"></span></div>
-                    <div><b>local md5:</b> <span id="localMd5"></span></div>
-                </div>
-                <div id="remote">
-                    <div><b>remote md5:</b> <span id="remoteMd5"></span></div>
-                </div>
-                <div id="msg"></div>
-                <div id="actions">
-                    <button type="button" id="fetch">Fetch</button>
-                    <button type="button" id="merge">Synchronize</button>
-                </div>
-            </form>
+        <div class="hr"><span>Overview</span></div>
+        <div class="area">
+            <div><b>modified:</b> <span id="mod"></span></div>
+            <div><b>last merge:</b> <span id="merge"></span></div>
+            <div><b>last fetch:</b> <span id="fetch"></span></div>
+            <div><b>state:</b> <span id="msg"></span></div>
         </div>
-        <div id="footer">
+        <div class="hr"><span>Bookmark Feeds</span></div>
+        <div class="area" id="feeds"></div>
+        <div class="actions">
+            <button type="button" id="fetch">Fetch</button>
+            <button type="button" id="merge">Synchronize</button>
         </div>
     </div>
 

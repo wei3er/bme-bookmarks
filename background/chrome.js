@@ -1,6 +1,6 @@
-function parseChrome(raw) {
+function parseChrome(folder, raw) {
     var items = [];
-    parseChromeNode(items, [], JSON.parse(raw));
+    parseChromeNode(items, folder != null && folder != "" ? [ folder ] : [], JSON.parse(raw));
     return items;
 }
 

@@ -4,14 +4,15 @@ body {
 
 #content {
     font-family: "Lucida Console", "Courier New", monospace;
-    font-size: 0.75em;
-    width: 350px;
+    font-size: 0.85em;
+    min-width: 350px;
 }
 
 #logo {
     float: left;
     display: block;
     text-align: center;
+    padding-left: 10px;
 }
 
 #title {
@@ -22,26 +23,37 @@ body {
     margin-left: 55px;
 }
 
+.dirty {
+    color: rgb(117, 3, 3);
+}
+
 #name {
     font-size: 1.6em;
     font-weight: bold;
 }
 
-hr {
+.hr {
     width: 95%;
-    margin-left: auto;
-    margin-right: auto;
-    border-width: 1px 0 0 0;
-    color:rgb(136, 136, 136);
+    text-align: center; 
+    border-bottom: 1px solid rgb(136, 136, 136); 
+    line-height: 0.1em;
+    margin: 10px 10px 10px 10px;
+ } 
+.hr span { 
+    background:rgb(236, 236, 236); 
+    padding-left: 5px;
+    padding-right: 5px;
 }
 
-#form {
+
+
+.area {
     overflow: hidden;
     clear: both;
-    padding-left: 10px;
+    padding-left: 20px;
 }
 
-#footer, #release {
+#release {
     color:dimgray;
     font-size: 0.8em;
 }
@@ -57,10 +69,10 @@ hr {
 
 #msg {
     padding-top: 5px;
-    color: rgb(117, 3, 3);
 }
 
-#actions {
-    padding-top: 10px;
+.actions {
+    padding-top: 20px;
+    padding-bottom: 10px;
     float: right;
 }

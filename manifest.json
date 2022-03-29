@@ -3,7 +3,7 @@
   "name": "BME - Bookmarks",
   "version": "1.0",
   "version_name": "release: 1.0 (commit: f3328ab)",
-  "description": "BOOTSTRAP ME - bookmarks from git",
+  "description": "BOOTSTRAP ME - sync bookmarks with git",
   "homepage_url": "https://github.com/wei3er/bme-bookmarks",
   "icons": {
     "48": "/icons/logo-48.png",

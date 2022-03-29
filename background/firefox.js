@@ -1,7 +1,7 @@
 
-function parseFirefox(raw) {
+function parseFirefox(folder, raw) {
     var items = [];
-    parseFirefoxNode(items, [], JSON.parse(raw));
+    parseFirefoxNode(items, folder != null && folder != "" ? [ folder ] : [], JSON.parse(raw));
     return items;
 }
 

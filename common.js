@@ -1,4 +1,19 @@
+const Formats = {
+    FIREFOX: "firefox",
+    CHROME: "chrome",
+}
 
+const AuthTypes = {
+    NONE: "none",
+    BASIC: "basic",
+    BEARER: "bearer",
+    GITHUB: "github",
+}
+
+const ContentTypes = {
+    PLAIN: "none",
+    GITHUB: "github",
+}
 
 const Events = {
     MERGE: "merge",
@@ -43,3 +58,6 @@ function httpRequest(obj) {
         xhr.send(obj.body);
     });
 }
+
+
+

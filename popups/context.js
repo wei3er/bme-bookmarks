@@ -9,20 +9,46 @@ function formatDate(d) {
     return "never";
 }
 
-function updateUI(resp) {
-    document.querySelector("#localDate").innerHTML = formatDate(resp.value.storage.ts);
-    document.querySelector("#remoteDate").innerHTML = formatDate(resp.value.remote.ts);
-    document.querySelector("#localMd5").innerHTML = formatDate(resp.value.storage.md5);
-
-    var dirty = resp.value.remote.md5 != resp.value.storage.md5
-    document.querySelector("#remote").style.visibility = "hidden";
-    if(dirty) {
-        document.querySelector("#remote").style.visibility = "visible";
-        document.querySelector("#remoteMd5").innerHTML = formatDate(resp.value.remote.md5);
+function updateUI(extensionState) {
+    var element = document.querySelector("#feeds");
+    while (element.lastChild) {
+        element.removeChild(element.lastChild);
     }
+    
+    var dirty = false;
+    var lastFetch = null;
+    var lastMerge = null;
+    for(const bookmark of extensionState.storage.bookmarks) {
+        var child = document.createElement("div");
+        child.className = "res";
 
-    if(resp.value.error || (resp.value.message != null && resp.value.message != "")) {
-        document.querySelector("#msg").innerHTML = (!resp.value.error ? "" : "error: ") + resp.value.message;
+        var cls = "md5";
+        var snapshot = extensionState.snapshots[bookmark.title];
+        if(snapshot) {
+            lastFetch = snapshot.ts;
+            dirty = dirty || snapshot.md5 != bookmark.md5;
+            cls = cls + (snapshot.md5 != bookmark.md5 ? " dirty" : "");
+        }
+        lastMerge = bookmark.ts;
+        
+        child.innerHTML = `<b>${bookmark.title}:</b> <span class="${cls}">${bookmark.md5}</span>`;
+        element.appendChild(child);
+    }
+    document.querySelector("#mod").innerHTML = formatDate(extensionState.storage.modified);
+    document.querySelector("#fetch").innerHTML = formatDate(lastFetch);
+    document.querySelector("#merge").innerHTML = formatDate(lastMerge);
+
+
+    var msgElement = document.querySelector("#msg");
+    if(extensionState.error || (extensionState.message != null && extensionState.message != "")) {
+        msgElement.classList.add("dirty");
+        msgElement.innerHTML = (!extensionState.error ? "" : "error: ") + extensionState.message;
+    } else if(dirty) {
+        msgElement.classList.add("dirty");
+        msgElement.innerHTML = "out of sync";
+    } else {
+        msgElement.className = "";
+        msgElement.innerHTML = "synced";
     }
 
     return httpRequest({ method: "GET", url: getBrowser().runtime.getURL("manifest.json") })
@@ -35,7 +61,7 @@ function updateUI(resp) {
 
 document.addEventListener("DOMContentLoaded", function() {
         getBrowser().runtime.sendMessage(newEvent(Events.STATE))
-            .then(resp => updateUI(resp))
+            .then(extensionState => updateUI(extensionState.value))
             .catch(handleError);
     }
 );
@@ -43,12 +69,15 @@ document.addEventListener("DOMContentLoaded", function() {
 document.addEventListener('click', (event)=> { 
     if(event.target.id == "merge") {
         getBrowser().runtime.sendMessage(newEvent(Events.MERGE))
-            .then(resp => updateUI(resp))
+            .then(extensionState => updateUI(extensionState.value))
             .catch(handleError);
     }
     if(event.target.id == "fetch") {
         getBrowser().runtime.sendMessage(newEvent(Events.FETCH))
-            .then(resp => updateUI(resp))
+            .then(extensionState => updateUI(extensionState.value))
             .catch(handleError);
     }
 });
+
+
+
