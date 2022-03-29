@@ -11,20 +11,19 @@ var extensionState = {
 function handleError(error) {
     extensionState.error = true;
     extensionState.message = error;
-    console.error(error)
-    browser.browserAction.setIcon({ path: "/icons/logo-error.png" });
+    console.error(error == "" ? "unspecified error": error)
+    updateIcon();
 }
 
 function parseBookmarks(raw) {
-    switch(extensionState.storage.format) {
+    switch(extensionState.storage.bookmarksFormat) {
         case "Firefox":
-            //TODO
-            return JSON.parse(raw);
+            return parseFirefox(raw);
         case "Chrome":
             //TODO
-            return JSON.parse(raw);
+            return parseChrome(raw);
         default:
-            throw `unsupported format type: ${extensionState.storage.format}!`;
+            throw `unsupported format type: ${extensionState.storage.bookmarksFormat}!`;
     }
 }
 
@@ -38,9 +37,6 @@ function reloadBookmarks() {
                 .then(obj => {
                     extensionState.remote.md5 = obj.md5;
                     extensionState.remote.ts = new Date();
-                    if(extensionState.storage.md5 != extensionState.remote.md5) {
-                        browser.browserAction.setIcon({ path: "/icons/logo-dirty.png" });
-                    }
                     return obj;
                 });
         });
@@ -101,7 +97,6 @@ async function createBookmarks(items) {
 
 
 function mergeBookmarks() {
-    browser.browserAction.setIcon({ path: "/icons/logo.png" });
     extensionState.error = false;
     extensionState.message = null
     return reloadBookmarks()
@@ -112,10 +107,24 @@ function mergeBookmarks() {
                 })
                 .then(() => {
                     var now = new Date();
+                    extensionState.storage.md5 = obj.md5;
+                    extensionState.storage.ts = now;
                     return getStorage().set({ ts: now, md5: obj.md5, raw: obj.raw });
-                })
-        })
-        .catch(handleError);
+                });
+        });
+}
+
+function updateIcon() {
+    browser.browserAction.setIcon({ path: "/icons/logo-96.png" });
+    if(extensionState.error) {
+        browser.browserAction.setBadgeText({ text: "E" });
+
+    } else if(extensionState.storage.md5 != extensionState.remote.md5) {
+        browser.browserAction.setBadgeText({ text: "U" });
+
+    } else {
+        browser.browserAction.setBadgeText({ text: "" });
+    }
 }
 
 // handle messages from other components
@@ -123,27 +132,43 @@ browser.runtime.onMessage.addListener((req, sender, sendResponse) => {
     switch(req.type) {
         case Events.MERGE:
             mergeBookmarks()
-                .finally(sendResponse(newEvent(Events.STATE, extensionState)));
-            break;
+                .then(() => {
+                    updateIcon();
+                })
+                .finally(() => {
+                    sendResponse(newEvent(Events.STATE, extensionState))
+                })
+                .catch(handleError);
+            return true;
+        case Events.FETCH:
+            reloadBookmarks()
+                .then(() => {
+                    updateIcon();
+                })
+                .finally(() => {
+                    sendResponse(newEvent(Events.STATE, extensionState))
+                })
+                .catch(handleError);
+            return true;
         case Events.ERROR:
             handleError(extensionState.message);
             sendResponse(newEvent(Events.ACK));
-            break;
+            return false;
         case Events.STATE:
             sendResponse(newEvent(Events.STATE, extensionState));
-            break;
+            return false;
         default:
             handleError(`unsupported message type ${req.type} received!`);
     }
 });
 
+const syncAlarm = "sync-alarm";
 getStorage().get().then(storageData => {
         // load snapshot of storage
         extensionState.storage = storageData;
     })
     .then(() => {
         // refresh bookmarks source periodically
-        const syncAlarm = "sync-alarm";
         browser.alarms.onAlarm.addListener(alarmInfo => {
             if(syncAlarm == alarmInfo.name) {
                 reloadBookmarks().catch(handleError);
@@ -156,12 +181,19 @@ getStorage().get().then(storageData => {
         return browser.storage.onChanged.addListener((changes, area) => {
             for (let item of Object.keys(changes)) {
                 extensionState.storage[item] = changes[item].newValue;
+                if(item = "reloadRate") {
+                    browser.alarms.clear(syncAlarm);
+                    browser.alarms.create(syncAlarm, { periodInMinutes: extensionState.storage.reloadRate });
+                }
             }
         });
     })
     .then(() => {
         // perform initial reload
-        return reloadBookmarks();
+        return reloadBookmarks()
+            .then(() => {
+                updateIcon();
+            });
     })
     .catch(handleError);
   

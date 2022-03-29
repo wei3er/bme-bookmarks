@@ -5,14 +5,12 @@
   "description": "BOOTSTRAP.ME - bookmarks from git",
   "homepage_url": "https://github.com/wei3er/bookmark-git/tree/master/firefox",
   "icons": {
-    "48": "/icons/logo.png",
-    "96": "/icons/logo-xl.png"
+    "48": "/icons/logo-48.png",
+    "96": "/icons/logo-96.png"
   },
-  
   "options_ui": {
     "page": "/prefs/options.html"
   },
-
   "permissions": [
     "storage",
     "bookmarks",
@@ -21,25 +19,24 @@
     "alarms",
     "unlimitedStorage"
   ],
-
   "browser_specific_settings": {
     "gecko": {
       "id": "bme-bookmarks@wei3er.com"
     }
   },
- 
   "browser_action": {
-    "default_icon": "/icons/logo.png",
+    "default_icon": "/icons/logo-96.png",
     "default_title": "BME - Bookmarks",
     "default_popup": "/popups/context.html"
   },
-
   "background": {
     "scripts": [
       "/common.js",
       "/md5.js",
+      "/md5.js",
+      "/background/firefox.js",
+      "/background/chrome.js",
       "/background/handler.js"
     ]
   }
-
 }

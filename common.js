@@ -1,5 +1,6 @@
 const Events = {
     MERGE: "merge",
+    FETCH: "fetch",
     ERROR: "error",
     STATE: "state",
     ACK: "ack",

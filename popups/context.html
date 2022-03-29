@@ -8,18 +8,41 @@
 </head>
 
 <body>
-    <div id="banner"><img src="/icons/logo.png"/>Bootstrap.me - Bookmarks</div>
-    <hr/>
-    <form>
-        <div id="local"></div>
-        <div id="remote"></div>
-        <div id="msg"></div>
-        <button type="submit" value="sync">Synchronize</button>
-    </form>
+
+    <div id="content">
+        <div id="banner">
+            <div id="logo">
+                <img src="/icons/logo-48.png"/>
+            </div>
+            <div id="title">
+                <span id="name"></span><br/>
+                <span id="release"></span>
+            </div>
+        </div>
+        <hr/>
+        <div id="form">
+            <form>
+                <div id="local">
+                    <div><b>local md5:</b> <span id="localMd5"></span></div>
+                    <div><b>last update:</b> <span id="localDate"></span></div>
+                </div>
+                <div id="remote">
+                    <div><b>remote md5:</b> <span id="remoteMd5"></span></div>
+                    <div><b>last check:</b> <span id="remoteDate"></span></div>
+                </div>
+                <div id="msg"></div>
+                <div id="actions">
+                    <button type="button" id="fetch">Fetch</button>
+                    <button type="button" id="merge">Synchronize</button>
+                </div>
+            </form>
+        </div>
+        <div id="footer">
+        </div>
+    </div>
 
     <script src="/common.js"></script>
     <script src="/popups/context.js"></script>
-
 </body>
 
 </html>

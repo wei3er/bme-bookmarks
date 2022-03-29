@@ -1,4 +1,66 @@
 body {
+    background-color: rgb(236, 236, 236);
+}
+
+#content {
     font-family: "Lucida Console", "Courier New", monospace;
     font-size: 0.75em;
+    width: 350px;
+}
+
+#logo {
+    float: left;
+    display: block;
+    text-align: center;
+}
+
+#title {
+    display: block;
+    text-align: left;
+    height: 42px;
+    padding-top: 10px;
+    margin-left: 55px;
+}
+
+#name {
+    font-size: 1.6em;
+    font-weight: bold;
+}
+
+hr {
+    width: 95%;
+    margin-left: auto;
+    margin-right: auto;
+    border-width: 1px 0 0 0;
+    color:rgb(136, 136, 136);
+}
+
+#form {
+    overflow: hidden;
+    clear: both;
+    padding-left: 10px;
+}
+
+#footer, #release {
+    color:dimgray;
+    font-size: 0.8em;
+}
+
+#local {
+    padding-top: 10px;
+}
+
+#remote {
+    padding-top: 5px;
+    color: rgb(187, 150, 1);
+}
+
+#msg {
+    padding-top: 5px;
+    color: rgb(117, 3, 3);
+}
+
+#actions {
+    padding-top: 10px;
+    float: right;
 }
