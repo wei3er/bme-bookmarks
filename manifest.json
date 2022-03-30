@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
   "name": "BME - Bookmarks",
-  "version": "1.0",
-  "version_name": "release: 1.0 (commit: f3328ab)",
+  "version": "1.2",
+  "version_name": "release: 1.2 (commit: f3328ab)",
   "description": "BOOTSTRAP ME - sync bookmarks with git",
   "homepage_url": "https://github.com/wei3er/bme-bookmarks",
   "icons": {
@@ -35,8 +35,7 @@
       "/common.js",
       "/md5.js",
       "/browser-polyfill.js",
-      "/background/firefox.js",
-      "/background/chrome.js",
+      "/background/parser.js",
       "/background/handler.js"
     ]
   }

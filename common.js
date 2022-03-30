@@ -1,6 +1,7 @@
 const Formats = {
     FIREFOX: "firefox",
     CHROME: "chrome",
+    PORTABLE: "portable",
 }
 
 const AuthTypes = {

@@ -23,8 +23,9 @@ function parseBookmarks(bookmark, raw) {
         case Formats.FIREFOX:
             return parseFirefox(bookmark.folder, raw);
         case Formats.CHROME:
-            //TODO
             return parseChrome(bookmark.folder, raw);
+        case Formats.PORTABLE:
+            return parsePortable(bookmark.folder, raw);
         default:
             throw `unsupported format type: ${bookmark.format}!`;
     }
@@ -91,7 +92,7 @@ function reloadBookmarks() {
                 bookmarkSnapshot.state.ts = new Date();
                 bookmarkSnapshot.state.md5 = md5(loadedData);
                 bookmarkSnapshot.bookmarks = parseBookmarks(bookmark, loadedData);
-
+                console.log(JSON.stringify(bookmarkSnapshot.bookmarks));
                 newSnapshots[bookmark.title] = bookmarkSnapshot;
                 allBookmarks.push(...bookmarkSnapshot.bookmarks);
                 return bookmarkSnapshot.bookmarks;

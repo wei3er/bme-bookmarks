@@ -67,6 +67,7 @@ function restoreOptions() {
 
                 document.querySelector(`#firefox-${idx}`).checked = bookmarks[i].format == Formats.FIREFOX;
                 document.querySelector(`#chrome-${idx}`).checked = bookmarks[i].format == Formats.CHROME;
+                document.querySelector(`#portable-${idx}`).checked = bookmarks[i].format == Formats.PORTABLE;
 
                 document.querySelector(`#plain-${idx}`).checked = bookmarks[i].content == ContentTypes.PLAIN;
                 document.querySelector(`#github1-${idx}`).checked = bookmarks[i].content == ContentTypes.GITHUB;
@@ -100,6 +101,8 @@ function addResource(idx) {
                 <label for="firefox-${idx}">Firefox</label>
                 <input type="radio" id="chrome-${idx}" name="format-${idx}" value="${Formats.CHROME}">
                 <label for="chrome-${idx}">Chrome</label>
+                <input type="radio" id="portable-${idx}" name="format-${idx}" value="${Formats.PORTABLE}">
+                <label for="portable-${idx}">Portable</label>
             </nobr></div>
             <div><nobr>
                 <label class="main">Content Type*: </label>
