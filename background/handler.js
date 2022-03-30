@@ -92,7 +92,7 @@ function reloadBookmarks() {
                 bookmarkSnapshot.state.ts = new Date();
                 bookmarkSnapshot.state.md5 = md5(loadedData);
                 bookmarkSnapshot.bookmarks = parseBookmarks(bookmark, loadedData);
-                console.log(JSON.stringify(bookmarkSnapshot.bookmarks));
+
                 newSnapshots[bookmark.title] = bookmarkSnapshot;
                 allBookmarks.push(...bookmarkSnapshot.bookmarks);
                 return bookmarkSnapshot.bookmarks;
@@ -128,31 +128,34 @@ function clearBookmarks() {
 
 async function createBookmarks(items) {
     const parentIds = {};
-    for (const item of items) {
-        var parent = null;
+    try {
+        for (const item of items) {
+            var parent = null;
 
-        var thisKey = "";
-        for (comp of item.path) {
-            thisKey += "###" + comp;
-            thisNode = parentIds[thisKey]
-            if (!thisNode) {
-                await getBrowser().bookmarks.create({
-                    parentId: parent == null ? null : parent.id,
-                    title: comp
-                }).then(function (i) {
-                    parentIds[thisKey] = i;
-                });
-                thisNode = parentIds[thisKey];
+            var thisKey = "";
+            for (comp of item.path) {
+                thisKey += "###" + comp;
+                thisNode = parentIds[thisKey]
+                if (!thisNode) {
+                    await getBrowser().bookmarks.create({
+                        parentId: parent == null ? null : parent.id,
+                        title: comp
+                    }).then(function (i) {
+                        parentIds[thisKey] = i;
+                    });
+                    thisNode = parentIds[thisKey];
+                }
+                parent = thisNode;
             }
-            parent = thisNode;
+            await getBrowser().bookmarks.create({
+                parentId: parent == null ? null : parent.id,
+                title: item.title,
+                url: item.url,
+            });
         }
-
-        await getBrowser().bookmarks.create({
-            parentId: parent == null ? null : parent.id,
-            title: item.title,
-            url: item.url,
-            index: item.index
-        });
+    } catch(e) {
+        handleError(e);
+        throw e;
     }
 }
 

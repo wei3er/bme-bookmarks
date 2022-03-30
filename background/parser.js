@@ -19,7 +19,6 @@ function parseFirefoxNode(items, path, thisNode) {
             items.push({
                 path: p,
                 title: thisNode.title,
-                index: thisNode.index,
                 url: thisNode.uri,
             });
         }
@@ -61,7 +60,6 @@ function parseChromeNode(items, path, thisNode) {
             items.push({
                 path: p,
                 title: thisNode.title,
-                index: thisNode.index,
                 url: thisNode.uri,
             });
         }
