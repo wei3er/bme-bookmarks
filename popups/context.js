@@ -25,13 +25,13 @@ function updateUI(extensionState) {
         var cls = "md5";
         var snapshot = extensionState.snapshots[bookmark.title];
         if(snapshot) {
-            lastFetch = snapshot.ts;
-            dirty = dirty || snapshot.md5 != bookmark.md5;
-            cls = cls + (snapshot.md5 != bookmark.md5 ? " dirty" : "");
+            lastFetch = snapshot.state.ts;
+            dirty = dirty || snapshot.state.md5 != bookmark.state.md5;
+            cls = cls + (snapshot.state.md5 != bookmark.state.md5 ? " dirty" : "");
         }
-        lastMerge = bookmark.ts;
+        lastMerge = bookmark.state.ts;
         
-        child.innerHTML = `<b>${bookmark.title}:</b> <span class="${cls}">${bookmark.md5}</span>`;
+        child.innerHTML = `<b>${bookmark.title}:</b> <span class="${cls}">${bookmark.state.md5}</span>`;
         element.appendChild(child);
     }
     document.querySelector("#mod").innerHTML = formatDate(extensionState.storage.modified);

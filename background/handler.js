@@ -13,8 +13,8 @@ function reset() {
 
 function handleError(error) {
     extensionState.error = true;
-    extensionState.message = error == "" ? "unspecified error" : error;
-    //console.error(extensionState.message);
+    extensionState.message = (error == null || error == "" ? "unspecified error" : error);
+    console.error(extensionState.message);
     updateIcon();
 }
 
@@ -81,15 +81,17 @@ function reloadBookmarks() {
                 bookmarkSnapshot = extensionState.snapshots[bookmark.title];
                 if (!bookmarkSnapshot) {
                     bookmarkSnapshot = {
-                        md5: null,
-                        ts: null,
+                        state: {
+                            md5: null,
+                            ts: null,
+                        },
                         bookmarks: null,
                     };
                 }
-                bookmarkSnapshot.md5 = md5(loadedData);
+                bookmarkSnapshot.state.ts = new Date();
+                bookmarkSnapshot.state.md5 = md5(loadedData);
                 bookmarkSnapshot.bookmarks = parseBookmarks(bookmark, loadedData);
 
-                bookmarkSnapshot.ts = new Date();
                 newSnapshots[bookmark.title] = bookmarkSnapshot;
                 allBookmarks.push(...bookmarkSnapshot.bookmarks);
                 return bookmarkSnapshot.bookmarks;
@@ -167,8 +169,7 @@ function mergeBookmarks() {
                     var now = new Date();
                     for (var bookmark of extensionState.storage.bookmarks) {
                         var update = extensionState.snapshots[bookmark.title];
-                        bookmark.md5 = update.md5;
-                        bookmark.ts = now;
+                        bookmark.state = update.state;
                     }
                     return getStorage().set({ bookmarks: extensionState.storage.bookmarks });
                 });
@@ -183,7 +184,7 @@ function updateIcon() {
     }
     for (const bookmark of extensionState.storage.bookmarks) {
         var update = extensionState.snapshots[bookmark.title];
-        if (bookmark.md5 != update.md5) {
+        if (update.state != null && (bookmark.state == null || bookmark.state.md5 != update.state.md5)) {
             getBrowser().browserAction.setBadgeText({ text: "U" });
             return;
         }

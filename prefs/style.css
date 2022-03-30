@@ -13,17 +13,34 @@
     width: 60px;
 }
 
-div {
+.resline {
     padding-top: 10px;
 }
 
-#form, #bookmarks {
+div {
+    padding-bottom: 5px;
+}
+
+#form {
     overflow: hidden;
     clear: both;
     padding-left: 10px;
 }
 
 .actions {
+    width: 100%;
     padding-top: 10px;
-    float: right;
+    text-align: right;
 }
+
+.main {
+    font-weight: bold;
+    padding-right: 5px;
+    padding-left: 10px;
+}
+
+.hr {
+    font-size: 1.1em;
+    padding-top: 5px;
+    padding-bottom: 10px;
+} 

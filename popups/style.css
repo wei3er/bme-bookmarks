@@ -1,5 +1,5 @@
 body {
-    background-color: rgb(236, 236, 236);
+    background-color: #c7cdd1;
 }
 
 #content {
@@ -13,6 +13,7 @@ body {
     display: block;
     text-align: center;
     padding-left: 10px;
+    padding-right: 10px;
 }
 
 #title {
@@ -40,7 +41,7 @@ body {
     margin: 10px 10px 10px 10px;
  } 
 .hr span { 
-    background:rgb(236, 236, 236); 
+    background:#c7cdd1;
     padding-left: 5px;
     padding-right: 5px;
 }
