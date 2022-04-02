@@ -3,6 +3,8 @@ var extensionState = {
     snapshots: {},
     error: false,
     message: null,
+    locked: false,
+    nextFetch: null,
 }
 
 function reset() {
@@ -74,7 +76,7 @@ function reloadBookmarks() {
                 return translateResponse(bookmark, payload);
             })
             .then(loadedData => {
-                bookmarkSnapshot.state.ts = new Date();
+                bookmarkSnapshot.state.ts = new Date().getTime();
                 bookmarkSnapshot.state.md5 = md5(loadedData);
                 bookmarkSnapshot.state.error = false;
                 bookmarkSnapshot.state.message = null;
@@ -88,7 +90,7 @@ function reloadBookmarks() {
                 return bookmarkSnapshot.bookmarks;
             })
             .catch(error => {
-                bookmarkSnapshot.state.ts = new Date();
+                bookmarkSnapshot.state.ts = new Date().getTime();
                 bookmarkSnapshot.state.error = true;
                 bookmarkSnapshot.state.message = error;
             }));
@@ -105,7 +107,7 @@ function clearBookmarks() {
         var tmp = [];
 
         for (const item of items) {
-            tmp.push(getBrowser().bookmarks.removeTree(item.id)
+            tmp.push(browser.bookmarks.removeTree(item.id)
                 .catch(function () {
                     if (item.children.length) {
                         tmp.push(rmItem(item.children))
@@ -115,7 +117,7 @@ function clearBookmarks() {
         }
         return Promise.all(tmp)
     }
-    return getBrowser().bookmarks.getTree()
+    return browser.bookmarks.getTree()
         .then(roots => {
             return rmItem(roots)
         });
@@ -132,7 +134,7 @@ async function createBookmarks(items) {
                 thisKey += "###" + comp;
                 thisNode = parentIds[thisKey]
                 if (!thisNode) {
-                    await getBrowser().bookmarks.create({
+                    await browser.bookmarks.create({
                         parentId: parent == null ? null : parent.id,
                         title: comp
                     }).then(function (i) {
@@ -142,7 +144,7 @@ async function createBookmarks(items) {
                 }
                 parent = thisNode;
             }
-            await getBrowser().bookmarks.create({
+            await browser.bookmarks.create({
                 parentId: parent == null ? null : parent.id,
                 title: item.title,
                 url: item.url,
@@ -165,45 +167,48 @@ function mergeBookmarks() {
                     return createBookmarks(items);
                 })
                 .then(() => {
-                    var now = new Date();
                     for (var bookmark of extensionState.storage.bookmarks) {
                         var update = extensionState.snapshots[bookmark.title];
                         bookmark.state = update.state;
                     }
                     return getStorage().set({ bookmarks: extensionState.storage.bookmarks });
                 });
-        });
+            });
 }
 
 function updateIcon() {
-    getBrowser().browserAction.setIcon({ path: "/icons/logo-96.png" });
+    browser.browserAction.setIcon({ path: "/icons/logo-96.png" });
     if (extensionState.error) {
-        getBrowser().browserAction.setBadgeText({ text: "E" });
+        browser.browserAction.setBadgeText({ text: "E" });
         return;
     }
     for (const bookmark of extensionState.storage.bookmarks) {
         var update = extensionState.snapshots[bookmark.title];
         if (update.state != null && (bookmark.state == null || bookmark.state.md5 != update.state.md5)) {
-            getBrowser().browserAction.setBadgeText({ text: "U" });
+            browser.browserAction.setBadgeText({ text: "U" });
             return;
         }
     }
-    getBrowser().browserAction.setBadgeText({ text: "" });
+    browser.browserAction.setBadgeText({ text: "" });
 }
 
 // handle messages from other components
-getBrowser().runtime.onMessage.addListener((req, sender, sendResponse) => {
+browser.runtime.onMessage.addListener((req, sender, sendResponse) => {
     switch (req.type) {
         case Events.MERGE:
             reset();
-            mergeBookmarks()
-                .then(() => {
-                    updateIcon();
-                })
-                .finally(() => {
-                    sendResponse(newEvent(Events.STATE, extensionState))
-                })
-                .catch(handleError);
+            if(!extensionState.locked) {
+                extensionState.locked = true;
+                mergeBookmarks()
+                    .then(() => {
+                        extensionState.locked = false;
+                        updateIcon();
+                    })
+                    .finally(() => {
+                        sendResponse(newEvent(Events.STATE, extensionState))
+                    })
+                    .catch(handleError);
+            }
             return true;
         case Events.FETCH:
             reloadBookmarks()
@@ -218,37 +223,48 @@ getBrowser().runtime.onMessage.addListener((req, sender, sendResponse) => {
         case Events.ERROR:
             handleError(extensionState.message);
             sendResponse(newEvent(Events.ACK));
-            return false;
+            return true;
         case Events.STATE:
             sendResponse(newEvent(Events.STATE, extensionState));
-            return false;
+            return true;
         default:
             handleError(`unsupported message type ${req.type} received!`);
+            return false;
     }
 });
 
+function updateNextFetch(alarmName) {
+    extensionState.nextFetch = new Date().getTime() + (extensionState.storage.reloadRate || 30)*60000;;
+    return browser.alarms.get(alarmName)
+        .then((alarmInfo) => {
+            return browser.alarms.clear(alarmName);
+        })
+        .finally(() => {
+            return browser.alarms.create(alarmName, { when: extensionState.nextFetch });
+        });
+}
 const syncAlarm = "sync-alarm";
 getStorage().get().then(storageData => {
-    // load snapshot of storage
-    extensionState.storage = storageData;
-})
+        // load snapshot of storage
+        extensionState.storage = storageData;
+    })
     .then(() => {
         // refresh bookmarks source periodically
-        getBrowser().alarms.onAlarm.addListener(alarmInfo => {
+        browser.alarms.onAlarm.addListener(alarmInfo => {
             if (syncAlarm == alarmInfo.name) {
                 reloadBookmarks().catch(handleError);
+                updateNextFetch(syncAlarm);
             }
         })
-        return getBrowser().alarms.create(syncAlarm, { periodInMinutes: extensionState.storage.reloadRate || 30 });
+        return updateNextFetch(syncAlarm);
     })
     .then(() => {
         // keep track of storage changes
-        return getBrowser().storage.onChanged.addListener((changes, area) => {
+        return browser.storage.onChanged.addListener((changes, area) => {
             for (let item of Object.keys(changes)) {
                 extensionState.storage[item] = changes[item].newValue;
                 if (item = "reloadRate") {
-                    getBrowser().alarms.clear(syncAlarm);
-                    getBrowser().alarms.create(syncAlarm, { periodInMinutes: extensionState.storage.reloadRate });
+                    updateNextFetch(syncAlarm);
                 }
             }
         });
@@ -263,7 +279,12 @@ getStorage().get().then(storageData => {
     .catch(handleError);
 
 // listen for bookmark changes
-browser.bookmarks.onChanged.addListener(function (id, changeInfo) {
-    getStorage().set({ modified: new Date() }).catch(handleError);
-});
-
+function setModified(id, changeInfo) {
+    if(!extensionState.locked) {
+        getStorage().set({ modified: new Date().getTime() }).catch(handleError);
+    }
+}
+browser.bookmarks.onCreated.addListener(setModified);
+browser.bookmarks.onRemoved.addListener(setModified);
+browser.bookmarks.onChanged.addListener(setModified);
+browser.bookmarks.onMoved.addListener(setModified);

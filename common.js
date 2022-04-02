@@ -25,18 +25,11 @@ const Events = {
 };
 
 function newEvent(type, value) {
-    return { type: type, ts: new Date(), value: value };
-}
-
-function getBrowser() {
-    if (typeof browser === "undefined") {
-        return chrome;
-    }
-    return browser;
+    return { type: type, ts: new Date().getTime(), value: value };
 }
 
 function getStorage() {
-    return getBrowser().storage.local;
+    return browser.storage.local;
 }
 
 function httpRequest(obj) {

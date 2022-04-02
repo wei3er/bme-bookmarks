@@ -2,14 +2,16 @@ function handleError(error) {
     console.error(error)
 }
 
-function formatDate(d) {
-    if(d) {
-        return d.toLocaleString();
+function formatDate(obj) {
+    if(!obj) {
+        return "never";
     }
-    return "never";
+    return new Date(obj).toLocaleString();
 }
 
 function updateUI(extensionState) {
+    document.getElementById("merge").disabled = false;
+    document.getElementById("fetch").disabled = false;
     var element = document.querySelector("#feeds");
     while (element.lastChild) {
         element.removeChild(element.lastChild);
@@ -43,8 +45,12 @@ function updateUI(extensionState) {
                 }
             }
         }
-        if(bookmark.state) {
-            if(lastMerge == null || lastMerge < bookmark.state.ts) {
+        if(bookmark.state && bookmark.state.ts) {
+            if(lastMerge) {
+                if(lastMerge < bookmark.state.ts) {
+                    lastMerge = bookmark.state.ts;
+                }
+            } else {
                 lastMerge = bookmark.state.ts;
             }
         }
@@ -52,10 +58,10 @@ function updateUI(extensionState) {
         child.innerHTML = `${stateLogo} ${bookmark.title}: <span title="${stateDetail}" class="${cls}">${stateDate}</span>`;
         element.appendChild(child);
     }
-    document.querySelector("#mod").innerHTML = formatDate(extensionState.storage.modified);
-    document.querySelector("#merge").innerHTML = formatDate(lastMerge);
-
-
+    document.getElementById("modDate").innerHTML = formatDate(extensionState.storage.modified);
+    document.getElementById("mergeDate").innerHTML = formatDate(lastMerge);
+    document.getElementById("nextDate").innerHTML = formatDate(extensionState.nextFetch);
+    
     var msgElement = document.querySelector("#msg");
     if(extensionState.error || (extensionState.message != null && extensionState.message != "")) {
         msgElement.className = "state error";
@@ -65,16 +71,16 @@ function updateUI(extensionState) {
         msgElement.innerHTML = "";
     }
 
-    return httpRequest({ method: "GET", url: getBrowser().runtime.getURL("manifest.json") })
+    return httpRequest({ method: "GET", url: browser.runtime.getURL("manifest.json") })
         .then(loadedData => {
             var manifest = JSON.parse(loadedData);
-            document.querySelector("#release").innerHTML = manifest.version_name;
-            document.querySelector("#name").innerHTML = manifest.name;
+            document.getElementById("release").innerHTML = manifest.version_name;
+            document.getElementById("name").innerHTML = manifest.name;
         });
 }
 
 document.addEventListener("DOMContentLoaded", function() {
-        getBrowser().runtime.sendMessage(newEvent(Events.STATE))
+        browser.runtime.sendMessage(newEvent(Events.STATE))
             .then(extensionState => updateUI(extensionState.value))
             .catch(handleError);
     }
@@ -82,12 +88,16 @@ document.addEventListener("DOMContentLoaded", function() {
 
 document.addEventListener('click', (event)=> { 
     if(event.target.id == "merge") {
-        getBrowser().runtime.sendMessage(newEvent(Events.MERGE))
+        document.getElementById("merge").disabled = true;
+        document.getElementById("fetch").disabled = true;
+        browser.runtime.sendMessage(newEvent(Events.MERGE))
             .then(extensionState => updateUI(extensionState.value))
             .catch(handleError);
     }
     if(event.target.id == "fetch") {
-        getBrowser().runtime.sendMessage(newEvent(Events.FETCH))
+        document.getElementById("merge").disabled = true;
+        document.getElementById("fetch").disabled = true;
+        browser.runtime.sendMessage(newEvent(Events.FETCH))
             .then(extensionState => updateUI(extensionState.value))
             .catch(handleError);
     }
