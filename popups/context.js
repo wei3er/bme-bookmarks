@@ -15,40 +15,48 @@ function updateUI(extensionState) {
         element.removeChild(element.lastChild);
     }
     
-    var dirty = false;
-    var lastFetch = null;
     var lastMerge = null;
+    console.log(JSON.stringify(extensionState));
     for(const bookmark of extensionState.storage.bookmarks) {
+        var snapshot = extensionState.snapshots[bookmark.title];
+
         var child = document.createElement("div");
         child.className = "res";
 
-        var cls = "md5";
-        var snapshot = extensionState.snapshots[bookmark.title];
-        if(snapshot) {
-            lastFetch = snapshot.state.ts;
-            dirty = dirty || snapshot.state.md5 != bookmark.state.md5;
-            cls = cls + (snapshot.state.md5 != bookmark.state.md5 ? " dirty" : "");
+        var cls = "state error";
+        var state = "undefinded state";
+        var detail =  "";
+        if(snapshot && snapshot.state) {
+            if(snapshot.state.error) {
+                cls += "state error";
+                state = `error (${JSON.stringify(snapshot.state.message)})`;
+            } else {
+                detail = `md5: ${snapshot.state.md5}`;
+                if(snapshot.state.md5 != bookmark.state.md5) {
+                    cls = "state dirty";
+                    state = `out of sync (${formatDate(snapshot.state.ts)})`;
+                } else {
+                    cls = "state";
+                    state = `synced (${formatDate(snapshot.state.ts)})`;
+                }
+            }
         }
         lastMerge = bookmark.state.ts;
         
-        child.innerHTML = `<b>${bookmark.title}:</b> <span class="${cls}">${bookmark.state.md5}</span>`;
+        child.innerHTML = `<b>${bookmark.title}:</b> <span title="${detail}" class="${cls}">${state}</span>`;
         element.appendChild(child);
     }
     document.querySelector("#mod").innerHTML = formatDate(extensionState.storage.modified);
-    document.querySelector("#fetch").innerHTML = formatDate(lastFetch);
     document.querySelector("#merge").innerHTML = formatDate(lastMerge);
 
 
     var msgElement = document.querySelector("#msg");
     if(extensionState.error || (extensionState.message != null && extensionState.message != "")) {
-        msgElement.classList.add("dirty");
+        msgElement.className = "state error";
         msgElement.innerHTML = (!extensionState.error ? "" : "error: ") + extensionState.message;
-    } else if(dirty) {
-        msgElement.classList.add("dirty");
-        msgElement.innerHTML = "out of sync";
     } else {
-        msgElement.className = "";
-        msgElement.innerHTML = "synced";
+        msgElement.className = "state";
+        msgElement.innerHTML = "";
     }
 
     return httpRequest({ method: "GET", url: getBrowser().runtime.getURL("manifest.json") })

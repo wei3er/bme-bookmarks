@@ -1,7 +1,6 @@
 var extensionState = {
     storage: {},
     snapshots: {},
-    modified: null,
     error: false,
     message: null,
 }
@@ -66,36 +65,45 @@ function translateAuthHeader(bookmark) {
 }
 
 function reloadBookmarks() {
-    var newSnapshots = {};
-    var allBookmarks = [];
+    const newSnapshots = {};
+    const allBookmarks = [];
     let promises = [];
     for (const bookmark of extensionState.storage.bookmarks) {
+        var tmp = extensionState.snapshots[bookmark.title];
+        if (!tmp) {
+            tmp = {
+                state: {},
+                bookmarks: {},
+            };
+        }
+        const bookmarkSnapshot = tmp;
+        newSnapshots[bookmark.title] = bookmarkSnapshot;
+
         promises.push(httpRequest({
-            method: "GET",
-            url: bookmark.uri,
-            headers: translateAuthHeader(bookmark)
-        })
+                method: "GET",
+                url: bookmark.uri,
+                headers: translateAuthHeader(bookmark)
+            })
             .then(payload => {
                 return translateResponse(bookmark, payload);
             })
             .then(loadedData => {
-                bookmarkSnapshot = extensionState.snapshots[bookmark.title];
-                if (!bookmarkSnapshot) {
-                    bookmarkSnapshot = {
-                        state: {
-                            md5: null,
-                            ts: null,
-                        },
-                        bookmarks: null,
-                    };
-                }
                 bookmarkSnapshot.state.ts = new Date();
                 bookmarkSnapshot.state.md5 = md5(loadedData);
-                bookmarkSnapshot.bookmarks = parseBookmarks(bookmark, loadedData);
-
-                newSnapshots[bookmark.title] = bookmarkSnapshot;
+                bookmarkSnapshot.state.error = false;
+                bookmarkSnapshot.state.message = null;
+                try {
+                    bookmarkSnapshot.bookmarks = parseBookmarks(bookmark, loadedData);
+                } catch(e) {
+                    bookmarkSnapshot.state.error = true;
+                    bookmarkSnapshot.state.message = error;
+                }
                 allBookmarks.push(...bookmarkSnapshot.bookmarks);
                 return bookmarkSnapshot.bookmarks;
+            })
+            .catch(error => {
+                bookmarkSnapshot.state.error = true;
+                bookmarkSnapshot.state.message = error;
             }));
     }
     return Promise.all(promises)

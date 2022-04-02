@@ -24,10 +24,6 @@ body {
     margin-left: 55px;
 }
 
-.dirty {
-    color: rgb(117, 3, 3);
-}
-
 #name {
     font-size: 1.6em;
     font-weight: bold;
@@ -70,6 +66,14 @@ body {
 
 #msg {
     padding-top: 5px;
+}
+
+.error {
+    color: rgb(117, 3, 3);
+}
+
+.dirty {
+    color: rgb(187, 150, 1);
 }
 
 .actions {
