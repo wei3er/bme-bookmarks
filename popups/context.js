@@ -16,34 +16,40 @@ function updateUI(extensionState) {
     }
     
     var lastMerge = null;
-    console.log(JSON.stringify(extensionState));
     for(const bookmark of extensionState.storage.bookmarks) {
         var snapshot = extensionState.snapshots[bookmark.title];
 
         var child = document.createElement("div");
         child.className = "res";
 
-        var cls = "state error";
-        var state = "undefinded state";
-        var detail =  "";
+        var cls = "detail error";
+        var stateLogo = `<img class="state-icon" src="/icons/error-solid.svg">`;
+        var stateDate =  "never";
+        var stateDetail =  "";
         if(snapshot && snapshot.state) {
             if(snapshot.state.error) {
-                cls += "state error";
-                state = `error (${JSON.stringify(snapshot.state.message)})`;
+                cls += "detail error";
+                stateLogo = `<img class="state-icon" src="/icons/cross-solid.svg">`;
+                stateDate = `${formatDate(snapshot.state.ts)} (${JSON.stringify(snapshot.state.message)})`;
             } else {
-                detail = `md5: ${snapshot.state.md5}`;
-                if(snapshot.state.md5 != bookmark.state.md5) {
-                    cls = "state dirty";
-                    state = `out of sync (${formatDate(snapshot.state.ts)})`;
+                stateDetail = `md5: ${snapshot.state.md5}`;
+                stateDate = formatDate(snapshot.state.ts);
+                if(!bookmark.state || snapshot.state.md5 != bookmark.state.md5) {
+                    cls = "detail dirty";
+                    stateLogo = `<img class="state-icon" src="/icons/refresh-double-rounded-solid.svg">`;
                 } else {
-                    cls = "state";
-                    state = `synced (${formatDate(snapshot.state.ts)})`;
+                    cls = "detail";
+                    stateLogo = `<img class="state-icon" src="/icons/checkmark-solid.svg">`;
                 }
             }
         }
-        lastMerge = bookmark.state.ts;
+        if(bookmark.state) {
+            if(lastMerge == null || lastMerge < bookmark.state.ts) {
+                lastMerge = bookmark.state.ts;
+            }
+        }
         
-        child.innerHTML = `<b>${bookmark.title}:</b> <span title="${detail}" class="${cls}">${state}</span>`;
+        child.innerHTML = `${stateLogo} ${bookmark.title}: <span title="${stateDetail}" class="${cls}">${stateDate}</span>`;
         element.appendChild(child);
     }
     document.querySelector("#mod").innerHTML = formatDate(extensionState.storage.modified);

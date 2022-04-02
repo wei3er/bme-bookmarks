@@ -1,3 +1,15 @@
+function parseBookmarks(bookmark, raw) {
+    switch (bookmark.format) {
+        case Formats.FIREFOX:
+            return parseFirefox(bookmark.folder, raw);
+        case Formats.CHROME:
+            return parseChrome(bookmark.folder, raw);
+        case Formats.PORTABLE:
+            return parsePortable(bookmark.folder, raw);
+        default:
+            throw `unsupported format type: ${bookmark.format}!`;
+    }
+}
 
 function parseFirefox(folder, raw) {
     var items = [];

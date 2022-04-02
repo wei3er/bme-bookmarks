@@ -17,20 +17,6 @@ function handleError(error) {
     updateIcon();
 }
 
-function parseBookmarks(bookmark, raw) {
-    switch (bookmark.format) {
-        case Formats.FIREFOX:
-            return parseFirefox(bookmark.folder, raw);
-        case Formats.CHROME:
-            return parseChrome(bookmark.folder, raw);
-        case Formats.PORTABLE:
-            return parsePortable(bookmark.folder, raw);
-        default:
-            throw `unsupported format type: ${bookmark.format}!`;
-    }
-}
-
-
 function translateResponse(bookmark, payload) {
     if (bookmark.content) {
         switch (bookmark.content) {
@@ -102,6 +88,7 @@ function reloadBookmarks() {
                 return bookmarkSnapshot.bookmarks;
             })
             .catch(error => {
+                bookmarkSnapshot.state.ts = new Date();
                 bookmarkSnapshot.state.error = true;
                 bookmarkSnapshot.state.message = error;
             }));
