@@ -7,10 +7,13 @@
   "homepage_url": "https://github.com/wei3er/bme-bookmarks",
   "icons": {
     "48": "/icons/logo-48.png",
-    "96": "/icons/logo-96.png"
+    "96": "/icons/logo-96.png",
+    "128": "/icons/logo-128.png"
   },
-  "options_ui": {
-    "page": "/prefs/options.html"
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "bme-bookmarks@wei3er.com"
+    }
   },
   "permissions": [
     "storage",
@@ -20,15 +23,13 @@
     "alarms",
     "unlimitedStorage"
   ],
-  "browser_specific_settings": {
-    "gecko": {
-      "id": "bme-bookmarks@wei3er.com"
-    }
-  },
   "browser_action": {
-    "default_icon": "/icons/logo-96.png",
+    "default_icon": "/icons/logo-128.png",
     "default_title": "BME - Bookmarks",
     "default_popup": "/popups/context.html"
+  },
+  "options_ui": {
+    "page": "/prefs/options.html"
   },
   "background": {
     "scripts": [
