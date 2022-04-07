@@ -4,6 +4,8 @@
 
 <head>
     <meta charset="utf-8">
+    <!-- <link rel="stylesheet" href="chrome://global/skin/in-content/common.css"> -->
+    <link rel="stylesheet" href="/common.css">
     <link rel="stylesheet" href="/popups/style.css">
 </head>
 
@@ -19,18 +21,18 @@
                 <span id="release"></span>
             </div>
         </div>
-        <div class="hr"><span>Overview</span></div>
+        <h4>Overview</h4>
         <div class="area">
             <div>local modified: <span id="modDate" class="detail"></span></div>
             <div>remote merged: <span id="mergeDate" class="detail"></span></div>
             <div>next fetch: <span id="nextDate" class="detail"></span></div>
             <div id="msg"></div>
         </div>
-        <div class="hr"><span>Bookmark Feeds</span></div>
+        <h4>Bookmark Feeds</h4>
         <div class="area" id="feeds"></div>
         <div class="actions">
             <button type="button" id="fetch">Fetch</button>
-            <button type="button" id="merge">Synchronize</button>
+            <button type="submit" id="merge">Synchronize</button>
         </div>
     </div>
 

@@ -89,14 +89,14 @@ function addResource(idx) {
     child.className = "resline";
     child.innerHTML += `
             <div><nobr>
-                <label class="main" for="title-${idx}">Title*: </label><input type="text" id="title-${idx}" class="title">
-                <label class="main" for="folder-${idx}">Folder: </label><input type="text" id="folder-${idx}" class="folder">
+                <label for="title-${idx}">Title*: </label><input type="text" id="title-${idx}" class="title">
+                <label for="folder-${idx}">Folder: </label><input type="text" id="folder-${idx}" class="folder">
             </nobr></div>
             <div><nobr>
-                <label class="main" for="uri-${idx}">URI*: </label><input type="text" id="uri-${idx}" class="uri">
+                <label for="uri-${idx}">URI*: </label><input type="text" id="uri-${idx}" class="uri">
             </nobr></div>
             <div><nobr>
-                <label class="main">Format*: </label>
+                <label>Format*: </label>
                 <input type="radio" id="firefox-${idx}" name="format-${idx}" value="${Formats.FIREFOX}" checked>
                 <label for="firefox-${idx}">Firefox</label>
                 <input type="radio" id="chrome-${idx}" name="format-${idx}" value="${Formats.CHROME}">
@@ -105,14 +105,14 @@ function addResource(idx) {
                 <label for="portable-${idx}">Portable</label>
             </nobr></div>
             <div><nobr>
-                <label class="main">Content Type*: </label>
+                <label>Content Type*: </label>
                 <input type="radio" id="plain-${idx}" name="content-${idx}" value="${ContentTypes.PLAIN}" checked>
                 <label for="plain-${idx}">Plain</label>
                 <input type="radio" id="github1-${idx}" name="content-${idx}" value="${ContentTypes.GITHUB}">
                 <label for="github1-${idx}">GitHub</label>
             </nobr></div>
             <div><nobr>
-                <label class="main">Auth Type*: </label>
+                <label>Auth Type*: </label>
                 <input type="radio" id="none-${idx}" name="auth-${idx}" value="${AuthTypes.NONE}" checked>
                 <label for="none-${idx}">None</label>
                 <input type="radio" id="basic-${idx}" name="auth-${idx}" value="${AuthTypes.BASIC}">
@@ -123,7 +123,7 @@ function addResource(idx) {
                 <label for="github2-${idx}">GitHub</label>
             </nobr></div>
             <div><nobr>
-                <label class="main" for="aval-${idx}">Auth Value*: </label><input type="password" id="aval-${idx}" class="title">
+                <label for="aval-${idx}">Auth Value*: </label><input type="password" id="aval-${idx}" class="title">
             </nobr></div>`;
     document.querySelector("#resources").appendChild(child);
 }

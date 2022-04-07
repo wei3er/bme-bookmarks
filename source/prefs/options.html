@@ -4,25 +4,27 @@
 
 <head>
     <meta charset="utf-8">
+    <!-- <link rel="stylesheet" href="chrome://global/skin/in-content/common.css"> -->
+    <link rel="stylesheet" href="/common.css">
     <link rel="stylesheet" href="/prefs/style.css">
 </head>
 
 <body>
 
     <form id="form">
+        <h3>General Settings</h3>
         <div>
-            <div class="hr"><span>Bookmark Feed</span></div>
+            <div>
+                <label for="reload">Reload Rate (mins)*: </label>
+                <input type="text" id="reload">
+            </div>
+        </div>
+        <h3>Bookmark Feed</h3>
+        <div>
             <div id="resources"></div>
             <div class="actions">
                 <button id="add" type="button">Add</button>
                 <button id="remove" type="button">Remove</button>
-            </div>
-        </div>
-        <div>
-            <div class="hr"><span>General Settings</span></div>
-            <div>
-                <label class="main" for="reload">Reload Rate (mins)*: </label>
-                <input type="text" id="reload">
             </div>
         </div>
         <div class="actions">
