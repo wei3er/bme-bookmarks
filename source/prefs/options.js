@@ -54,9 +54,11 @@ function getOptional(obj, key, defaultValue) {
 }
 
 function restoreOptions() {
-    getStorage().get().then(storageData => {
+    getStorage().get()
+        .then(storageData => {
             document.querySelector("#reload").value = getOptional(storageData, "reloadRate", 15);
-
+            
+            document.querySelector("#resources").innerHTML = "";
             var bookmarks = getOptional(storageData, "bookmarks", [{ uri: "https://exmaple.com/bookmarks.json", format: "Firefox" }]);
             for(i in bookmarks) {
                 var idx = parseInt(i) + 1;
@@ -135,13 +137,49 @@ function rmResource() {
     }
 }
 
+function exportOptions() {
+    getStorage().get()
+        .then(storageData => {
+            var element = document.createElement('a');
+            element.setAttribute('href', 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(storageData)));
+            element.setAttribute('download', "settings.json");
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+        })
+        .catch(handleError);
+}
+
+function importOptions(file) {
+    file.text()
+        .then(data => {
+            return getStorage().set(JSON.parse(data))
+                .catch(handleError);
+        })
+        .then(data => {
+            restoreOptions();
+        })
+        .catch(handleError);
+}
+
 document.addEventListener("DOMContentLoaded", restoreOptions);
 document.querySelector("form").addEventListener("submit", saveOptions);
-document.addEventListener('click', (event)=> { 
+document.addEventListener('click', (event) => { 
     if(event.target.id == "add") {
         addResource(document.querySelector("#resources").childElementCount + 1);
     }
     if(event.target.id == "remove") {
         rmResource();
     }
+    if(event.target.id == "export") {
+        exportOptions();
+    }
+    if(event.target.id == "import") {
+        importFile.click();
+    }
 });
+
+document.getElementById("importFile").addEventListener("change", function() {
+    importOptions(this.files[0]);
+}, false);

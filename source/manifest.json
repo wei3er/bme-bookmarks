@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "BME - Bookmarks",
   "version": "1.4",
-  "version_name": "release: 1.4",
+  "version_name": "release: 1.4 (commit: 51c6614)",
   "description": "BOOTSTRAP ME - sync bookmarks with git",
   "homepage_url": "https://github.com/wei3er/bme-bookmarks",
   "icons": {
