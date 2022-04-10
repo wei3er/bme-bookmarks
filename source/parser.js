@@ -11,7 +11,7 @@ function parseFirefoxNode(items, path, thisNode) {
         if(!thisNode.root && thisNode.typeCode == 2) {
             p = [...p, thisNode.title];
         }
-        for(child of thisNode.children) {
+        for(var child of thisNode.children) {
             parseFirefoxNode(items, p, child)
         }
     } else {
@@ -46,24 +46,8 @@ function parseChrome(folder, raw) {
 }
 
 function parseChromeNode(items, path, thisNode) {
-    if(true) throw new Error("not yet implemented!");
-    var p = path;
-    if(thisNode.children) {
-        if(!thisNode.root && thisNode.typeCode == 2) {
-            p = [...p, thisNode.title];
-        }
-        for(child of thisNode.children) {
-            parseChromeNode(items, p, child)
-        }
-    } else {
-        if(thisNode.typeCode == 1 && thisNode.uri) {
-            items.push({
-                path: p,
-                title: thisNode.title,
-                url: thisNode.uri,
-            });
-        }
-    }
+    //TODO
+    throw new Error("not yet implemented!");
 }
 
 //###########

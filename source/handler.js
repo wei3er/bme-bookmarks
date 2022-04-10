@@ -45,7 +45,7 @@ function mergeBookmarks(_state) {
                 })
                 .then(() => {
                     for (var bookmark of _state.bookmarks) {
-                        if(bookmark.error != null) {
+                        if(bookmark.error == null) {
                             bookmark.state = bookmark.target;
                         }
                     }
@@ -77,13 +77,13 @@ function reloadBookmarks(_state) {
                 try {
                     return _parser.parseBookmarks(bookmark, loadedData);
                 } catch(e) {
-                    bookmark.error = convertMessage(error);
+                    bookmark.error = convertMessage(e);
                 }
                 return [];
             })
-            .catch(error => {
+            .catch(e => {
                 bookmark.target.ts = new Date().getTime();
-                bookmark.error = convertMessage(error);
+                bookmark.error = convertMessage(e);
             }));
     }
     return Promise.all(promises)
