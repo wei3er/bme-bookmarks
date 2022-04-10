@@ -25,7 +25,7 @@ function updateUI(_state) {
         var stateDate =  "never";
         var stateDetail =  "";
         if(bookmark.target) {
-            if(bookmark.error) {
+            if(bookmark.error != null) {
                 cls += "detail error";
                 stateLogo = `<img class="state-icon" src="/icons/cross-solid.svg">`;
                 stateDate = `${formatDate(bookmark.target.ts)} (${JSON.stringify(bookmark.error)})`;

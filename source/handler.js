@@ -290,11 +290,6 @@ module.exports = {
 
 };
 
-// initial reload
-storage().get().then(storageData => {
-    return reloadBookmarks(storageData)
-});
-
 //###########
 /*
 

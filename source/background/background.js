@@ -15,6 +15,10 @@ function updateNextFetch(alarmName) {
         });
 }
 
+// initial reload
+_handler.reloadBookmarks().catch(_handler.handleError);
+
+
 const syncAlarm = "sync-alarm";
 // refresh bookmarks source periodically
 _handler.alarms().onAlarm.addListener(alarmInfo => {
