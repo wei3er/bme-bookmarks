@@ -1,13 +1,12 @@
-function handleError(error) {
-    console.error(error)
-}
+const _parser = require('../parser.js');
+const _handler = require('../handler.js');
 
 function saveOptions(e) {
     e.preventDefault();
 
     var bookmarks = [];
     var element = e.target.querySelector("#resources");
-    for(i=0; i<element.children.length; i++) {
+    for(var i=0; i<element.children.length; i++) {
         var idx = parseInt(i) + 1;
         var title = e.target.querySelector(`#title-${idx}`).value;
         var folder = e.target.querySelector(`#folder-${idx}`).value;
@@ -28,22 +27,28 @@ function saveOptions(e) {
             content: content 
         });
     }
-    getStorage().get().then(storageData => {
-        if(storageData.bookmarks) {
-            // copy state
-            for(oldValue of storageData.bookmarks) {
-                for(newValue of bookmarks) {
-                    if(newValue.title == oldValue.title) {
-                        newValue.state = oldValue.state;
+    _handler.storage().get()
+        .then(storageData => {
+            if(storageData.bookmarks) {
+                // copy state
+                for(var newValue of bookmarks) {
+                    for(var oldValue of storageData.bookmarks) {
+                        if(newValue.title == oldValue.title) {
+                            newValue.state = oldValue.state;
+                            newValue.target = oldValue.target;
+                            newValue.error = oldValue.error;
+                        }
                     }
                 }
             }
-        }
-        getStorage().set({
+        })
+        .then(storageData => {
+            return _handler.storage().set({
                 reloadRate: parseInt(e.target.querySelector("#reload").value),
                 bookmarks: bookmarks,
-            }).catch(handleError);
-    });
+            });
+        })
+        .catch(_handler.handleError);
 }
 
 function getOptional(obj, key, defaultValue) {
@@ -54,36 +59,36 @@ function getOptional(obj, key, defaultValue) {
 }
 
 function restoreOptions() {
-    getStorage().get()
+    _handler.storage().get()
         .then(storageData => {
             document.querySelector("#reload").value = getOptional(storageData, "reloadRate", 15);
             
             document.querySelector("#resources").innerHTML = "";
             var bookmarks = getOptional(storageData, "bookmarks", [{ uri: "https://exmaple.com/bookmarks.json", format: "Firefox" }]);
-            for(i in bookmarks) {
+            for(var i in bookmarks) {
                 var idx = parseInt(i) + 1;
                 addResource(idx);
                 document.querySelector(`#title-${idx}`).value = bookmarks[i].title;
                 document.querySelector(`#folder-${idx}`).value = bookmarks[i].folder;
                 document.querySelector(`#uri-${idx}`).value = bookmarks[i].uri;
 
-                document.querySelector(`#firefox-${idx}`).checked = bookmarks[i].format == Formats.FIREFOX;
-                document.querySelector(`#chrome-${idx}`).checked = bookmarks[i].format == Formats.CHROME;
-                document.querySelector(`#portable-${idx}`).checked = bookmarks[i].format == Formats.PORTABLE;
+                document.querySelector(`#firefox-${idx}`).checked = bookmarks[i].format == _parser.Formats.FIREFOX;
+                document.querySelector(`#chrome-${idx}`).checked = bookmarks[i].format == _parser.Formats.CHROME;
+                document.querySelector(`#portable-${idx}`).checked = bookmarks[i].format == _parser.Formats.PORTABLE;
 
-                document.querySelector(`#plain-${idx}`).checked = bookmarks[i].content == ContentTypes.PLAIN;
-                document.querySelector(`#github1-${idx}`).checked = bookmarks[i].content == ContentTypes.GITHUB;
+                document.querySelector(`#plain-${idx}`).checked = bookmarks[i].content == _handler.ContentTypes.PLAIN;
+                document.querySelector(`#github1-${idx}`).checked = bookmarks[i].content == _handler.ContentTypes.GITHUB;
 
                 if(bookmarks[i].auth) {
-                    document.querySelector(`#none-${idx}`).checked = bookmarks[i].auth.type == AuthTypes.NONE;
-                    document.querySelector(`#basic-${idx}`).checked = bookmarks[i].auth.type == AuthTypes.BASIC;
-                    document.querySelector(`#bearer-${idx}`).checked = bookmarks[i].auth.type == AuthTypes.BEARER;
-                    document.querySelector(`#github2-${idx}`).checked = bookmarks[i].auth.type == AuthTypes.GITHUB;
+                    document.querySelector(`#none-${idx}`).checked = bookmarks[i].auth.type == _handler.AuthTypes.NONE;
+                    document.querySelector(`#basic-${idx}`).checked = bookmarks[i].auth.type == _handler.AuthTypes.BASIC;
+                    document.querySelector(`#bearer-${idx}`).checked = bookmarks[i].auth.type == _handler.AuthTypes.BEARER;
+                    document.querySelector(`#github2-${idx}`).checked = bookmarks[i].auth.type == _handler.AuthTypes.GITHUB;
                     document.querySelector(`#aval-${idx}`).value = bookmarks[i].auth.value;
                 }
             }
         })
-        .catch(handleError);
+        .catch(_handler.handleError);
 }
 
 function addResource(idx) {
@@ -99,29 +104,29 @@ function addResource(idx) {
             </nobr></div>
             <div><nobr>
                 <label>Format*: </label>
-                <input type="radio" id="firefox-${idx}" name="format-${idx}" value="${Formats.FIREFOX}" checked>
+                <input type="radio" id="firefox-${idx}" name="format-${idx}" value="${_parser.Formats.FIREFOX}" checked>
                 <label for="firefox-${idx}">Firefox</label>
-                <input type="radio" id="chrome-${idx}" name="format-${idx}" value="${Formats.CHROME}">
+                <input type="radio" id="chrome-${idx}" name="format-${idx}" value="${_parser.Formats.CHROME}">
                 <label for="chrome-${idx}">Chrome</label>
-                <input type="radio" id="portable-${idx}" name="format-${idx}" value="${Formats.PORTABLE}">
+                <input type="radio" id="portable-${idx}" name="format-${idx}" value="${_parser.Formats.PORTABLE}">
                 <label for="portable-${idx}">Portable</label>
             </nobr></div>
             <div><nobr>
                 <label>Content Type*: </label>
-                <input type="radio" id="plain-${idx}" name="content-${idx}" value="${ContentTypes.PLAIN}" checked>
+                <input type="radio" id="plain-${idx}" name="content-${idx}" value="${_handler.ContentTypes.PLAIN}" checked>
                 <label for="plain-${idx}">Plain</label>
-                <input type="radio" id="github1-${idx}" name="content-${idx}" value="${ContentTypes.GITHUB}">
+                <input type="radio" id="github1-${idx}" name="content-${idx}" value="${_handler.ContentTypes.GITHUB}">
                 <label for="github1-${idx}">GitHub</label>
             </nobr></div>
             <div><nobr>
                 <label>Auth Type*: </label>
-                <input type="radio" id="none-${idx}" name="auth-${idx}" value="${AuthTypes.NONE}" checked>
+                <input type="radio" id="none-${idx}" name="auth-${idx}" value="${_handler.AuthTypes.NONE}" checked>
                 <label for="none-${idx}">None</label>
-                <input type="radio" id="basic-${idx}" name="auth-${idx}" value="${AuthTypes.BASIC}">
+                <input type="radio" id="basic-${idx}" name="auth-${idx}" value="${_handler.AuthTypes.BASIC}">
                 <label for="basic-${idx}">Basic</label>
-                <input type="radio" id="bearer-${idx}" name="auth-${idx}" value="${AuthTypes.BEARER}">
+                <input type="radio" id="bearer-${idx}" name="auth-${idx}" value="${_handler.AuthTypes.BEARER}">
                 <label for="bearer-${idx}">Bearer</label>
-                <input type="radio" id="github2-${idx}" name="auth-${idx}" value="${AuthTypes.GITHUB}">
+                <input type="radio" id="github2-${idx}" name="auth-${idx}" value="${_handler.AuthTypes.GITHUB}">
                 <label for="github2-${idx}">GitHub</label>
             </nobr></div>
             <div><nobr>
@@ -138,7 +143,7 @@ function rmResource() {
 }
 
 function exportOptions() {
-    getStorage().get()
+    _handler.storage().get()
         .then(storageData => {
             var element = document.createElement('a');
             element.setAttribute('href', 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(storageData)));
@@ -148,19 +153,19 @@ function exportOptions() {
             element.click();
             document.body.removeChild(element);
         })
-        .catch(handleError);
+        .catch(_handler.handleError);
 }
 
 function importOptions(file) {
     file.text()
         .then(data => {
-            return getStorage().set(JSON.parse(data))
-                .catch(handleError);
+            return _handler.storage().set(JSON.parse(data))
+                .catch(_handler.handleError);
         })
         .then(data => {
             restoreOptions();
         })
-        .catch(handleError);
+        .catch(_handler.handleError);
 }
 
 document.addEventListener("DOMContentLoaded", restoreOptions);

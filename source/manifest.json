@@ -1,43 +1,61 @@
 {
-  "manifest_version": 2,
-  "name": "BME - Bookmarks",
-  "version": "1.4",
-  "version_name": "release: 1.4 (commit: 51c6614)",
-  "description": "BOOTSTRAP ME - sync bookmarks with git",
-  "homepage_url": "https://github.com/wei3er/bme-bookmarks",
-  "icons": {
-    "48": "/icons/logo-48.png",
-    "96": "/icons/logo-96.png",
-    "128": "/icons/logo-128.png"
-  },
-  "browser_specific_settings": {
-    "gecko": {
-      "id": "bme-bookmarks@wei3er.com"
-    }
-  },
-  "permissions": [
-    "storage",
-    "bookmarks",
-    "webRequest",
-    "<all_urls>",
-    "alarms",
-    "unlimitedStorage"
-  ],
-  "browser_action": {
-    "default_icon": "/icons/logo-128.png",
-    "default_title": "BME - Bookmarks",
-    "default_popup": "/popups/context.html"
-  },
-  "options_ui": {
-    "page": "/prefs/options.html"
-  },
-  "background": {
-    "scripts": [
-      "/browser-polyfill.js",
-      "/common.js",
-      "/md5.js",
-      "/background/parser.js",
-      "/background/handler.js"
-    ]
-  }
+	"manifest_version": 2,
+	"name": "BME - Bookmarks",
+	"version": "1.5",
+	"version_name": "release: 1.5 (commit: 51c6614)",
+	"description": "BOOTSTRAP ME - sync bookmarks with git",
+	"homepage_url": "https://github.com/wei3er/bme-bookmarks",
+
+	"icons": {
+		"48": "icons/logo-48.png",
+		"96": "icons/logo-96.png",
+		"128": "icons/logo-128.png",
+		"190": "icons/logo-128.png"
+	},
+
+	"web_accessible_resources": [
+		"icons/checkmark-solid.svg",
+		"icons/cross-solid.svg",
+		"icons/error-solid.svg",
+		"icons/refresh-double-rounded-solid.svg",
+		"icons/lightning-solid.svg",
+		"icons/refresh-solid.svg"
+	],
+
+	"browser_specific_settings": {
+		"gecko": {
+			"id": "bme-bookmarks@wei3er.com",
+			"strict_min_version": "80.0"
+		}
+	},
+
+	"permissions": [
+		"storage",
+		"bookmarks",
+		"webRequest",
+		"<all_urls>",
+		"alarms",
+		"unlimitedStorage"
+	],
+
+	"browser_action": {
+		"browser_style": true,
+		"default_icon": "icons/logo-128.png",
+		"default_title": "BME - Bookmarks",
+		"default_popup": "context/context.html"
+	},
+
+	"options_ui": {
+		"open_in_tab": false,
+		"browser_style": true,
+		"page": "opts/options.html"
+	},
+
+	"background": {
+		"persistent": false,
+		"scripts": [
+		  "background/background.js"
+		]
+	}
+
 }

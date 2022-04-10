@@ -1,1 +1,4 @@
 .ignore
+node_modules
+.parcel-cache
+package-lock.json

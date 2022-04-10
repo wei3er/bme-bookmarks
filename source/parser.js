@@ -1,15 +1,3 @@
-function parseBookmarks(bookmark, raw) {
-    switch (bookmark.format) {
-        case Formats.FIREFOX:
-            return parseFirefox(bookmark.folder, raw);
-        case Formats.CHROME:
-            return parseChrome(bookmark.folder, raw);
-        case Formats.PORTABLE:
-            return parsePortable(bookmark.folder, raw);
-        default:
-            throw `unsupported format type: ${bookmark.format}!`;
-    }
-}
 
 function parseFirefox(folder, raw) {
     var items = [];
@@ -58,7 +46,7 @@ function parseChrome(folder, raw) {
 }
 
 function parseChromeNode(items, path, thisNode) {
-    if(true) throw "not yet implemented!"
+    if(true) throw new Error("not yet implemented!");
     var p = path;
     if(thisNode.children) {
         if(!thisNode.root && thisNode.typeCode == 2) {
@@ -77,3 +65,30 @@ function parseChromeNode(items, path, thisNode) {
         }
     }
 }
+
+//###########
+
+const Formats = {
+    FIREFOX: "firefox",
+    CHROME: "chrome",
+    PORTABLE: "portable",
+};
+
+module.exports = {
+
+    Formats: Formats,
+
+    parseBookmarks: function(bookmark, raw) {
+        switch (bookmark.format) {
+            case Formats.FIREFOX:
+                return parseFirefox(bookmark.folder, raw);
+            case Formats.CHROME:
+                return parseChrome(bookmark.folder, raw);
+            case Formats.PORTABLE:
+                return parsePortable(bookmark.folder, raw);
+            default:
+                throw new Error(`unsupported format type: ${bookmark.format}!`);
+        }
+    },
+
+};
