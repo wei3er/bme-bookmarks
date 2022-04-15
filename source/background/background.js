@@ -15,8 +15,25 @@ function updateNextFetch(alarmName) {
         });
 }
 
-// initial reload
-_handler.reloadBookmarks().catch(_handler.handleError);
+_handler.storage().get()
+    .then(_state => {
+        if(typeof(_state.bookmarks) == "undefined") {
+            return _handler.storage().set({ 
+                        bookmarks: [],
+                        modified: null,
+                        merged: null,
+                        nextFetch: new Date().getTime() + 60 * 60000,
+                        reloadRate: 60,
+                        error: null,
+                    });
+        }
+    })
+    .then(() => {
+        // initial reload
+        return _handler.reloadBookmarks();
+    })
+    .catch(_handler.handleError);
+
 
 
 const syncAlarm = "sync-alarm";

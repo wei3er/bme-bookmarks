@@ -49,7 +49,8 @@ function mergeBookmarks(_state) {
                             bookmark.state = bookmark.target;
                         }
                     }
-                    return storage().set({ bookmarks: _state.bookmarks });
+                    _state.merged = new Date().getTime();
+                    return storage().set({ bookmarks: _state.bookmarks, merged: _state.merged });
                 });
         }).then(() => {
             return _state;
@@ -188,7 +189,7 @@ function convertMessage(err) {
 }
 
 function handleError(err) {
-    action().setIcon({ path: "icons/logo-96.png" });
+    action().setIcon({ path: "/icons/logo-96.png" });
     action().setBadgeText({ text: "E" });
     console.error(convertMessage(err));
 }

@@ -15,47 +15,45 @@ function updateUI(_state) {
         element.removeChild(element.lastChild);
     }
     
-    var lastMerge = null;
-    for(const bookmark of _state.bookmarks) {
+    if(_state.bookmarks.length == 0) {
         var child = document.createElement("div");
         child.className = "res";
-
-        var cls = "detail error";
-        var stateLogo = `<img class="state-icon" src="/icons/error-solid.svg">`;
-        var stateDate =  "never";
-        var stateDetail =  "";
-        if(bookmark.target) {
-            if(bookmark.error != null) {
-                cls += "detail error";
-                stateLogo = `<img class="state-icon" src="/icons/cross-solid.svg">`;
-                stateDate = `${formatDate(bookmark.target.ts)} (${JSON.stringify(bookmark.error)})`;
-            } else {
-                stateDetail = `md5: ${bookmark.target.md5}`;
-                stateDate = formatDate(bookmark.target.ts);
-                if(!bookmark.state || bookmark.target.md5 != bookmark.state.md5) {
-                    cls = "detail dirty";
-                    stateLogo = `<img class="state-icon" src="/icons/refresh-double-rounded-solid.svg">`;
-                } else {
-                    cls = "detail";
-                    stateLogo = `<img class="state-icon" src="/icons/checkmark-solid.svg">`;
-                }
-            }
-        }
-        if(bookmark.state && bookmark.state.ts) {
-            if(lastMerge) {
-                if(lastMerge < bookmark.state.ts) {
-                    lastMerge = bookmark.state.ts;
-                }
-            } else {
-                lastMerge = bookmark.state.ts;
-            }
-        }
-        
-        child.innerHTML = `${stateLogo} ${bookmark.title}: <span title="${stateDetail}" class="${cls}">${stateDate}</span>`;
+        child.innerHTML = "no feeds defined yet!";
         element.appendChild(child);
+
+    } else {
+        for(const bookmark of _state.bookmarks) {
+            var child = document.createElement("div");
+            child.className = "res";
+    
+            var cls = "detail error";
+            var stateLogo = `<img class="state-icon" src="/icons/error-solid.svg">`;
+            var stateDate =  "never";
+            var stateDetail =  "";
+            if(bookmark.target) {
+                if(bookmark.error != null) {
+                    cls += "detail error";
+                    stateLogo = `<img class="state-icon" src="/icons/cross-solid.svg">`;
+                    stateDate = `${formatDate(bookmark.target.ts)} (${JSON.stringify(bookmark.error)})`;
+                } else {
+                    stateDetail = `md5: ${bookmark.target.md5}`;
+                    stateDate = formatDate(bookmark.target.ts);
+                    if(!bookmark.state || bookmark.target.md5 != bookmark.state.md5) {
+                        cls = "detail dirty";
+                        stateLogo = `<img class="state-icon" src="/icons/refresh-double-rounded-solid.svg">`;
+                    } else {
+                        cls = "detail";
+                        stateLogo = `<img class="state-icon" src="/icons/checkmark-solid.svg">`;
+                    }
+                }
+            }
+            
+            child.innerHTML = `${stateLogo} ${bookmark.title}: <span title="${stateDetail}" class="${cls}">${stateDate}</span>`;
+            element.appendChild(child);
+        }
     }
     document.getElementById("modDate").innerHTML = formatDate(_state.modified);
-    document.getElementById("mergeDate").innerHTML = formatDate(lastMerge);
+    document.getElementById("mergeDate").innerHTML = formatDate(_state.merged);
     document.getElementById("nextDate").innerHTML = formatDate(_state.nextFetch);
     
     var msgElement = document.querySelector("#msg");

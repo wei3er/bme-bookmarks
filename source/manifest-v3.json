@@ -1,5 +1,5 @@
 {
-	"manifest_version": 2,
+	"manifest_version": 3,
 	"name": "BME - Bookmarks",
 	"version": "1.5",
 	"version_name": "release: 1.5 (commit: 51c6614)",
@@ -13,9 +13,10 @@
 		"190": "icons/logo-190.png"
 	},
 
-	"web_accessible_resources": [
-		"icons/*"
-	],
+	"web_accessible_resources": [{
+		"resources": [ "icons/*" ],
+		"matches": [ "https://github.com/*" ]
+	}],
 
 	"browser_specific_settings": {
 		"gecko": {
@@ -28,12 +29,16 @@
 		"storage",
 		"bookmarks",
 		"webRequest",
-		"<all_urls>",
-		"alarms",
+		"alarms"
+	],
+	"optional_permissions": [
 		"unlimitedStorage"
 	],
+	"host_permissions": [
+		"<all_urls>"
+	],
 
-	"browser_action": {
+	"action": {
 		"browser_style": true,
 		"default_icon": "icons/logo-128.png",
 		"default_title": "BME - Bookmarks",
@@ -47,10 +52,8 @@
 	},
 
 	"background": {
-		"persistent": false,
-		"scripts": [
-			"background/background.js"
-		]
+		"service_worker": "background/background.js",
+		"type": "module"
 	}
 
 }
