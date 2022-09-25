@@ -2,10 +2,10 @@
 	"private": true,
 	"scripts": {
 		"build": "parcel build source/manifest.json --no-content-hash --no-source-maps --dist-dir dist --no-cache --detailed-report 0",
-		"dist-v2": "npm run build && cp source/manifest.json dist/manifest.json && cd dist && zip -r bme-bookmarks-v2.zip *",
-		"dist-v3": "npm run build && cp source/manifest-v3.json dist/manifest.json && cd dist && zip -r bme-bookmarks-v3.zip *",
+		"dist:bin": "mkdir build ; npm run build && cd dist && zip -r ../build/bme-bookmarks.zip *",
+		"dist:src": "zip -r build/bme-bookmarks-sources.zip LICENSE Readme.md source/* *json .parcelrc .terserrc",
 		"lint": "run-p lint:*",
-		"lint-fix": "run-p 'lint:* -- --fix'",
+		"lint:fix": "run-p 'lint:* -- --fix'",
 		"lint:css": "stylelint source/**/*.css",
 		"lint:js": "xo",
 		"test": "run-p lint:* build",
