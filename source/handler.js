@@ -204,10 +204,6 @@ function bookmarks() {
     return _browser.bookmarks;
 }
 
-function onStorageChange(listener) {
-    return _browser.storage.onChanged.addListener(listener);
-}
-
 function storage() {
     return _browser.storage.local;
 }
@@ -286,63 +282,4 @@ module.exports = {
     storage: storage,
     alarms: alarms,
     manifest: manifest,
-
-    onStorageChange: onStorageChange,
-
 };
-
-//###########
-/*
-
-{
-
-    "modified": "2022-03-29T15:40:50.858Z",
-    "nextFetch": "2022-03-29T15:40:50.858Z",
-    "reloadRate": 30,
-    "error": null,
-    "bookmarks": [
-        {
-            "title": "Test",
-            "folder": "TEST",
-            "uri": "https://server.fritz.box:40443/s/W6Dcggb4F4Qn6qD/download/bookmarks.json",
-            "format": "firefox",
-            "auth": {
-                "type": "none",
-                "value": ""
-            },
-            "content": "none",
-            "state": {
-                "md5": "6b755498bf0b1a1b40a784c0d375560d",
-                "ts": "2022-03-30T06:47:33.638Z"
-            },
-            "target": {
-                "md5": "6b755498bf0b1a1b40a784c0d375560d",
-                "ts": "2022-03-30T06:47:33.638Z"
-            },
-            "error": null
-        },
-        {
-            "title": "GitHub",
-            "folder": "",
-            "uri": "https://api.github.com/repos/wei3er/bme-files/contents/bookmarks.json?ref=master",
-            "format": "portable",
-            "auth": {
-                "type": "github",
-                "value": "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"
-            },
-            "content": "github",
-            "state": {
-                "md5": "44fb777847aa6a68e819e77c19aba375",
-                "ts": "2022-03-30T06:47:33.477Z"
-            },
-            "target": {
-                "md5": "44fb777847aa6a68e819e77c19aba375",
-                "ts": "2022-03-30T06:47:33.477Z"
-            },
-            "error": null
-        }
-    ]
-
-}
-
-*/

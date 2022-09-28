@@ -47,16 +47,6 @@ _handler.alarms().onAlarm.addListener(alarmInfo => {
 })
 updateNextFetch(syncAlarm)
     .then(() => {
-        // keep track of storage changes
-        return _handler.onStorageChange((changes, area) => {
-            for (let item of Object.keys(changes)) {
-                if (item = "reloadRate") {
-                    return updateNextFetch(syncAlarm);
-                }
-            }
-        });
-    })
-    .then(() => {
         // perform initial reload
         return _handler.reloadBookmarks();
     })
