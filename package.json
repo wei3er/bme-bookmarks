@@ -1,10 +1,9 @@
 {
 	"private": true,
 	"scripts": {
-		"build:v2": "parcel build source/manifest.json --no-content-hash --no-source-maps --dist-dir build/dist --no-cache --detailed-report 0",
-		"build:v3": "parcel build source/manifest-v3.json --no-content-hash --no-source-maps --dist-dir build/dist --no-cache --detailed-report 0",
-		"dist:v2": "mkdir build ; npm run build:v2 && cd build/dist && zip -r ../bme-bookmarks.zip *",
-		"dist:v3": "mkdir build ; npm run build:v3 && cd build/dist && zip -r ../bme-bookmarks.zip *",
+		"build": "parcel build source/manifest.json --no-content-hash --no-source-maps --dist-dir build/dist --no-cache --detailed-report 0",
+		"dist:v2": "mkdir build ; ln -f manifest-v2.json source/manifest.json && npm run build && cd build/dist && zip -r ../bme-bookmarks.zip *",
+		"dist:v3": "mkdir build ; ln -f manifest-v3.json source/manifest.json && npm run build && cd build/dist && zip -r ../bme-bookmarks.zip *",
 		"dist:src": "zip -r build/bme-bookmarks-sources.zip LICENSE Readme.md source/* *json .parcelrc .terserrc",
 		"lint": "run-p lint:*",
 		"lint:fix": "run-p 'lint:* -- --fix'",

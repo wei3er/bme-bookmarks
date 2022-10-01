@@ -1,8 +1,8 @@
 {
-	"manifest_version": 2,
+	"manifest_version": 3,
 	"name": "BME - Bookmarks",
 	"version": "1.8",
-	"version_name": "release: 1.8 (commit: 91a54bb262765a40c6cb281a3501d3b546e2b9e6)",
+	"version_name": "release: 1.8 (commit: fc24831b8aa0cfc562b3a2858d4b40962171b49c)",
 	"description": "BOOTSTRAP ME - sync bookmarks with git",
 	"homepage_url": "https://github.com/wei3er/bme-bookmarks",
 
@@ -13,9 +13,10 @@
 		"190": "icons/logo-190.png"
 	},
 
-	"web_accessible_resources": [
-		"icons/*"
-	],
+	"web_accessible_resources": [{
+		"resources": [ "icons/*" ],
+		"matches": [ "https://github.com/*" ]
+	}],
 
 	"browser_specific_settings": {
 		"gecko": {
@@ -28,12 +29,16 @@
 		"storage",
 		"bookmarks",
 		"webRequest",
-		"<all_urls>",
-		"alarms",
+		"alarms"
+	],
+	"optional_permissions": [
 		"unlimitedStorage"
 	],
+	"host_permissions": [
+		"<all_urls>"
+	],
 
-	"browser_action": {
+	"action": {
 		"browser_style": true,
 		"default_icon": "icons/logo-128.png",
 		"default_title": "BME - Bookmarks",
@@ -47,10 +52,8 @@
 	},
 
 	"background": {
-		"persistent": false,
-		"scripts": [
-			"background/background.js"
-		]
+		"service_worker": "background/background.js",
+		"type": "module"
 	}
 
 }
